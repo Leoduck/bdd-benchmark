@@ -213,6 +213,11 @@ public:
   }
 
   inline adiar::bdd
+  replace(const adiar::bdd& f, const std::function<int(int)> m) {
+    return adiar::bdd_replace(f, m);
+  }
+
+  inline adiar::bdd
   relnext(const adiar::bdd& states, const adiar::bdd& rel, const adiar::bdd& /*rel_support*/)
   {
     return adiar::bdd_relnext(

@@ -303,6 +303,19 @@ public:
   }
 
   inline bdd
+  replace(const bdd& f, const std::function<int(int)> m){
+    bddPair* mapping = bdd_newpair();
+
+    for(int i = _varcount; 0 < i; i -=1){
+      //std::cout << "i : " << i-1 << "; m(i) : " << m(i-1) << '\n';
+      if (m(i-1) > _varcount) {bdd_setvarnum(m(i-1) + 1); }
+      bdd_setpair(mapping, i-1, m(i-1));
+    }
+
+    return bdd_replace(f, mapping);
+  }
+
+  inline bdd
   relnext(const bdd& states, const bdd& rel, const bdd& /*rel_support*/)
   {
     if (!_pairs_relnext) {
