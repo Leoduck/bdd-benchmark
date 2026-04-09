@@ -184,6 +184,7 @@ run_apply(int argc, char** argv)
       case operand::OR: result |= inputs_dd.at(i); break;
       }
     }
+    adapter.print_dot(result, "TESTTESTTEST.dot");
     const time_point t_apply_after = now();
 
     const size_t apply_time = duration_ms(t_apply_before, t_apply_after);
