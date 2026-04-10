@@ -22,17 +22,16 @@
 //                                        INPUT PARSING                                           //
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-unsigned int seed = 987654321;
+std::vector<std::string> inputs_path;
+
 
 class parsing_policy
 {
 public:
-  static constexpr std::string_view name = "Replace random";
-  static constexpr std::string_view args = "n:n";
+  static constexpr std::string_view name = "Replace queens";
+  static constexpr std::string_view args = "n:";
 
-  static constexpr std::string_view help_text = 
-    "        -s SEED               Seed used for this run\n"
-    "        -n n         [8]      Size of board";
+  static constexpr std::string_view help_text = "        -n n         [8]      Size of board";
 
   static inline bool
   parse_input(const int c, const char* arg)
@@ -46,10 +45,6 @@ public:
       }
       return false;
     }
-    case 's': {
-      seed = std::stoi(arg);
-      return false;
-    }
     default: return true;
     }
   }
@@ -57,14 +52,14 @@ public:
 
 template <typename Adapter>
 int run_replace(int argc, char** argv) {
-  bool should_exit = parse_input<parsing_policy>(argc, argv);
+  const bool should_exit = parse_input<parsing_policy>(argc, argv);
   if (should_exit) { return -1; }
 
   // =============================================================================================
   // Initialize BDD package
   return run<Adapter>("replace", N * N, [&](Adapter& adapter) {
 
-    std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
+    std::cout << json::field("apply") << json::brace_open << json::endl << json::flush;
 
 #ifdef BDD_BENCHMARK_STATS
     std::cout << json::field("intermediate results") << json::brace_open << json::endl;
@@ -96,21 +91,24 @@ int run_replace(int argc, char** argv) {
 
     std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
 
+    for (int i = 0; i < 5; i++) {
+      Permutation p = Permutation(N*N, i);
+      res = adapter.replace(res, p);
+      adapter.print_dot(res, std::to_string(i) + "TESTTESTTEST.dot");
+    }
 
-    const time_point t_replace_before = now();
+    const time_point t_apply_before = now();
     // res = adapter.replace(res, [&](int x){if (x == 1) {return 0;} else if (x == 0) {return 1;} else {return x;}});
-    Permutation p = Permutation(N*N, seed);
-    res = adapter.replace(res, p);
     adapter.print_dot(res, "TESTTESTTEST.dot");
-    const time_point t_replace_after = now();
+    const time_point t_apply_after = now();
 
-    const size_t replace_time = duration_ms(t_replace_before, t_replace_after);
-    total_time += replace_time;
+    const size_t apply_time = duration_ms(t_apply_before, t_apply_after);
+    total_time += apply_time;
 
     std::cout << json::field("size (nodes)") << adapter.nodecount(res) << json::comma
               << json::endl;
     std::cout << json::field("satcount") << adapter.satcount(res) << json::comma << json::endl;
-    std::cout << json::field("time (ms)") << replace_time << json::endl;
+    std::cout << json::field("time (ms)") << apply_time << json::endl;
 
     std::cout << json::brace_close << json::comma << json::endl;
 
