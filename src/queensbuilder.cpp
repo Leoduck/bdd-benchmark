@@ -3,18 +3,10 @@
 #include <cassert>
 
 // Data Structures
-#include <sstream>
 #include <string>
 
 // Types
 #include <cstdlib>
-
-#include "common/adapter.h"
-#include "common/array.h"
-#include "common/chrono.h"
-#include "common/input.h"
-#include "common/json.h"
-
 
 
 int N = 8;
