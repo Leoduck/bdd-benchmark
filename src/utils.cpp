@@ -1,26 +1,37 @@
 #include <algorithm>
-#include <iostream>
 #include <random>
 #include <vector>
 
 class Permutation {
 private: 
-	std::vector<int> perm;
+  std::vector<unsigned> perm;
 
 public:
-	Permutation(int N, unsigned int seed){
-	perm.resize(N);
-	for (int i = 0; i < N; i++){
-		perm[i] = i;
-	};
+  Permutation(int N, int seed){
+  perm.resize(N);
+  for (int i = 0; i < N; i++){
+    perm[i] = i;
+  };
 
-	std::mt19937 g(seed);
-	std::shuffle(perm.begin(), perm.end(), g);
-	}
+    std::mt19937 gen(seed);
+    std::shuffle(perm.begin(), perm.end(), gen);
+  }
 
-	int operator()(int x) const {
-		return perm[x];
-	}
+  Permutation(int N){
+  perm.resize(N);
+  for (int i = 0; i < N; i++){
+    perm[i] = i;
+  };
+  std::reverse(perm.begin(), perm.end());
+  }
+
+  Permutation(std::vector<unsigned> p){
+    perm = p;
+  }
+
+  int operator()(int x) const {
+    return perm[x];
+    }
 };
 
 
