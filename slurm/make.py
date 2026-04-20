@@ -1396,7 +1396,7 @@ def sbatch_str(jobname, time, is_exclusive):
 #SBATCH --cpus-per-task=1
 #SBATCH --time={time}
 #SBATCH --mail-type=END,FAIL,REQUEUE
-#SBATCH --mail-user=soelvsten@cs.au.dk''' + ("\n#SBATCH --exclusive" if is_exclusive else "")
+#SBATCH --mail-user=202109103@post.au.dk''' + ("\n#SBATCH --exclusive" if is_exclusive else "")
 
 def benchmark_awk_str(i):
     # $1  = output file path
