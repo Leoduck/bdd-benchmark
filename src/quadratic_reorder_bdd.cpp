@@ -106,7 +106,7 @@ run_quadratic(int argc, char** argv)
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
 
     adapter.print_dot(f, "beforeTESTTESTTEST.dot");
-    Permutation p = Permutation(varcount);
+    Permutation p = Permutation(N, 0, map_opt::REVERSE);
 
     const time_point g_before = now();
     f = adapter.replace(f, p);

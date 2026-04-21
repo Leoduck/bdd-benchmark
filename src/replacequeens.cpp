@@ -92,7 +92,7 @@ int run_replace(int argc, char** argv) {
     std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
 
     for (int i = 0; i < 5; i++) {
-      Permutation p = Permutation(N*N, i);
+      Permutation p = Permutation(N*N, i, map_opt::RANDOM);
       res = adapter.replace(res, p);
       adapter.print_dot(res, std::to_string(i) + "TESTTESTTEST.dot");
     }

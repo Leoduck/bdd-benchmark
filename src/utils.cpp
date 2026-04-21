@@ -1,51 +1,108 @@
 #include <algorithm>
+#include <iostream>
 #include <random>
 #include <vector>
+
+enum class map_opt : signed char {
+    RANDOM = 0,
+    REVERSE = 1,
+    JUMP_DOWN = 2,
+    ADJ_SWAP = 3,
+};
+
 
 class Permutation {
 private: 
   std::vector<unsigned> perm;
 
+
 public:
-  Permutation(int N, int seed){
+  //random seeded permutation
+  Permutation(int N, int seed, map_opt po){
   perm.resize(N);
-  for (int i = 0; i < N; i++){
-    perm[i] = i;
-  };
 
-    std::mt19937 gen(seed);
-    std::shuffle(perm.begin(), perm.end(), gen);
+  std::mt19937 gen(seed);
+  switch (po) {
+    case map_opt::RANDOM : {
+      //gen random permutation
+      for (int i = 0; i < N; i++){
+        perm[i] = i;
+      };
+      std::shuffle(perm.begin(), perm.end(), gen);
+      break;}
+    case map_opt::REVERSE : {
+      //gen reverse permutation
+      for (int i = 0; i < N; i++){
+        perm[i] = i;
+      };
+      std::reverse(perm.begin(), perm.end());
+      break;}
+    case map_opt::JUMP_DOWN :{
+      //assume only even layers present in bdd
+      for (int i = 0; i < N; i++){
+        perm[i] = 2*i;
+      };
+      //plan gen random number -> amount of jumps to do
+      //then segment map into that many parts
+      //do a random jump in each
+      std::uniform_int_distribution<int> dis(0, (N/3));
+      int number_of_jumps = dis(gen);
+      //std::cout << "number 0f jumps = " << number_of_jumps << "\n";
+      int segment_size = N/number_of_jumps;
+      //std::cout << "segment size = " << segment_size  << "\n";
+      for (int i = 0; i < N; i += segment_size){
+        //std::cout << "start of segment " << i  << "\n";
+        //std::cout << "end of segment " << i+segment_size-1  << "\n";
+        std::uniform_int_distribution<int> tdis(i, i+segment_size-1);
+        int j1 = tdis(gen);
+        int j2 = tdis(gen);
+        int start = std::min(j1,j2);
+        perm[start] = (j1 == start) ? j2*2+1 : j1*2+1 ;
+      }
+
+    }  
+    case map_opt::ADJ_SWAP :
+    // pick a number of layers randomly 
+    //swap them with their lower? neighbour
+    for (int i = 0; i < N; i++){
+        perm[i] = i;
+    };
+    //number of swaps
+    std::uniform_int_distribution<int> dis(0, (N/2)-1);
+    int number_of_swaps = dis(gen);
+    int segment_size = N/number_of_swaps;
+    for(int i = 0 ; i < N ; i+=segment_size){
+      std::uniform_int_distribution<int> tdis(i, i+segment_size-2);
+      int swap_top = tdis(gen);
+      perm[swap_top] = swap_top+1;
+      perm[swap_top+1] = swap_top;
+    }
+  }
+  
   }
 
-  Permutation(int N){
-  perm.resize(N);
-  for (int i = 0; i < N; i++){
-    perm[i] = i;
-  };
-  std::reverse(perm.begin(), perm.end());
-  }
-
+  //identity (based on vector)
   Permutation(std::vector<unsigned> p){
     perm = p;
   }
 
+  //perm is func :D
   int operator()(int x) const {
     return perm[x];
     }
 };
 
 
-// For testing the random order...
-// int main(int argc, char **argv){
-// 	int N;
-// 	while(true) {
-// 		std::cin >> N;
-//
-// 		Permutation p = Permuation(N, 10);
-//
-// 		for (int i = 0; i < N; i++) {
-// 			std::cout << p(i) << ", ";
-// 		}
-// 		std::cout << '\n';
-// 	}
-// }
+// For testing the permutations...
+/*int main(int argc, char **argv){
+  int N, seed;
+  while(true) {
+    std::cin >> N;
+    std::cin >> seed;
+    Permutation p = Permutation(N, seed, map_opt::ADJ_SWAP);
+    for (int i = 0; i < N; i++) {
+      std::cout << p(i) << ", ";
+    }
+    std::cout << '\n';
+  }
+}*/
