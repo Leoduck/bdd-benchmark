@@ -109,7 +109,7 @@ run_quadratic(int argc, char** argv)
     Permutation p = Permutation(varcount, 1, map_opt::REVERSE);
 
     const time_point g_before = now();
-    f = adapter.replace(f, p);
+    f = adapter.replace_2(f, p);
     const time_point g_after = now();
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
