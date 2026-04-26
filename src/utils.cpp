@@ -8,6 +8,7 @@ enum class map_opt : signed char {
     REVERSE = 1,
     JUMP_DOWN = 2,
     ADJ_SWAP = 3,
+    ODD_SPLIT = 4,
 };
 
 
@@ -33,6 +34,24 @@ public:
             case map_opt::REVERSE : {
                 //gen reverse permutation
                 std::reverse(perm.begin(), perm.end());
+                break;}
+            case map_opt::ODD_SPLIT : {
+                int n = perm.size();
+                std::vector<unsigned> result(n);
+
+                int i = 0;
+                int evenIndex = 0;
+                int oddIndex = n / 2;
+
+                for (unsigned x : perm) {
+                    if (x % 2 == 0) {
+                        result[i] = evenIndex++;
+                    } else {
+                        result[i] = oddIndex++;
+                    }
+                    ++i;
+                }
+                perm = result;
                 break;}
             case map_opt::JUMP_DOWN :{
                 //assume only even layers present in bdd
@@ -89,15 +108,15 @@ public:
 
 
 // For testing the permutations...
-/*int main(int argc, char **argv){
-  int N, seed;
-  while(true) {
-    std::cin >> N;
-    std::cin >> seed;
-    Permutation p = Permutation(N, seed, map_opt::ADJ_SWAP);
-    for (int i = 0; i < N; i++) {
-      std::cout << p(i) << ", ";
-    }
-    std::cout << '\n';
-  }
-}*/
+// int main(int argc, char **argv){
+//   int N, seed;
+//   while(true) {
+//     std::cin >> N;
+//     std::cin >> seed;
+//     Permutation p = Permutation(N, seed, map_opt::ODD_SPLIT);
+//     for (int i = 0; i < N; i++) {
+//       std::cout << p(i) << ", ";
+//     }
+//     std::cout << '\n';
+//   }
+// }
