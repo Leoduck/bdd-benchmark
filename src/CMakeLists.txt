@@ -179,4 +179,7 @@ __add_benchmark(adiar adiar replace_quadratic bdd)
 __add_benchmark(buddy buddy replace_quadratic bdd)
 __add_benchmark(buddy buddy replace_quadratic_1 bdd)
 
+__add_benchmark(adiar adiar diamond_replace bdd)
+__add_benchmark(buddy buddy diamond_replace bdd)
+
 add_benchmark(cnf)
