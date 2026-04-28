@@ -89,7 +89,7 @@ cache_size(const size_t memory_bytes, const int nodes)
   const size_t cache_memory = (memory_bytes - nodes * sizeof_node) / (sizeof_cache * caches);
 
   // Choose cache size based on remaining memory, but bounded from either side.
-  return std::max(min_cache, std::min(max_cache, max_cache));
+  return std::max(min_cache, std::min(max_cache, cache_memory));
 }
 
 class buddy_bdd_adapter
