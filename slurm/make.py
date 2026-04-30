@@ -79,7 +79,7 @@ import os
 
 epfl_spec_t    = Enum('epfl_spec_t',    ['arithmetic', 'random_control'])
 epfl_opt_t     = Enum('epfl_opt_t',     ['depth', 'size'])
-picotrav_opt_t = Enum('picotrav_opt_t', ['DF', 'INPUT', 'LEVEL', 'LEVEL_DF', 'RANDOM'])
+picotrav_opt_t = Enum('picotrav_opt_t', ['DF', 'INPUT', 'LEVEL', 'LEVEL_DF', 'RANDOM', 'FUJITA', 'FANIN', 'FANIN_DF'])
 
 def picotrav__spec(spec_t, circuit_name):
     return f"../epfl/{spec_t.name}/{circuit_name}.blif"
@@ -90,8 +90,9 @@ def picotrav__opt(opt_t, circuit_name):
                       if f.startswith(circuit_name)][0]
     return f"../epfl/best_results/{opt_t.name}/{circuit_file}"
 
-def picotrav__args(spec_t, opt_t, circuit_name, picotrav_opt):
-    return f"-o {picotrav_opt.name} -f {picotrav__spec(spec_t, circuit_name)} -f {picotrav__opt(opt_t, circuit_name)}"
+# def picotrav__args(spec_t, opt_t, circuit_name, picotrav_opt):
+def picotrav__args(spec_t, opt_t, circuit_name):
+    return f"-o {picotrav_opt.name} -f {picotrav__spec(spec_t, circuit_name)}" #-f {picotrav__opt(opt_t, circuit_name)}"
 
 # --------------------------------------------------------------------------- #
 def qbf__args(circuit_name):
@@ -1246,6 +1247,105 @@ BENCHMARKS = {
     #         [ [15,00, 0], "-n 29" ],
     #     ]
     # },
+    # --------------------------------------------------------------------------
+    "picotrav_replace": {
+        dd_t.bdd: [
+            # arithmetic
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "adder",      picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "bar",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "bar",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "div",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "div",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "log2",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "log2",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "max",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [ 6,12, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "max",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "multiplier", picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "multiplier", picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 3, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.LEVEL_DF) ],
+            [ [ 5, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "sin",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sqrt",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "sqrt",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "square",     picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "square",     picotrav_opt_t.LEVEL_DF) ],
+            # random_control
+            [ [ 0, 1, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 2, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "arbiter",    picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "cavlc",      picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "ctrl",       picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "dec",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "i2c",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "int2float",  picotrav_opt_t.INPUT) ],
+            [ [ 0, 2, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 2, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "mem_ctrl",   picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "priority",   picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "router",     picotrav_opt_t.INPUT) ],
+            [ [ 1, 0,00], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 3,00], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "voter",      picotrav_opt_t.LEVEL_DF) ],
+        ],
+        dd_t.zdd: [
+            # arithmetic
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "adder",      picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "bar",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "bar",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "div",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "div",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "log2",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "log2",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "max",        picotrav_opt_t.LEVEL_DF) ],
+            # [ [ 9, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "max",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "multiplier", picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "multiplier", picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 3, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.LEVEL_DF) ],
+            # [ [ 5, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "sin",        picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sqrt",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "sqrt",       picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "square",     picotrav_opt_t.LEVEL_DF) ],
+          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "square",     picotrav_opt_t.LEVEL_DF) ],
+            # random_control
+            [ [ 0, 1, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 2, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "arbiter",    picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "cavlc",      picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "ctrl",       picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "dec",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "i2c",        picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.INPUT) ],
+            [ [ 0, 2, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "int2float",  picotrav_opt_t.INPUT) ],
+            # [ [ 1, 0, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.LEVEL_DF) ],
+            # [ [ 1, 0, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "mem_ctrl",   picotrav_opt_t.LEVEL_DF) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "priority",   picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.INPUT) ],
+            [ [ 0, 0,10], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "router",     picotrav_opt_t.INPUT) ],
+            # [ [ 3, 0, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.LEVEL_DF) ],
+            # [ [ 2, 0, 0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.depth, "voter",      picotrav_opt_t.LEVEL_DF) ],
+        ]
+    },
+    "diamond_replace": {
+        dd_t.bdd: [
+            [ [ 0, 0, 20], "-n 100" ],
+            [ [ 0, 0, 20], "-n 500" ],
+            [ [ 0, 0, 20], "-n 1000" ],
+            [ [ 0, 0, 20], "-n 1500" ],
+            [ [ 0, 0, 20], "-n 2000" ],
+            [ [ 0, 0, 20], "-n 3000" ],
+            [ [ 0, 0, 20], "-n 4000" ],
+            [ [ 0, 0, 20], "-n 5000" ],
+        ]
+    },
     "replace_quadratic": {
         dd_t.bdd: [
             [ [ 0, 0, 20], "-n 100" ],

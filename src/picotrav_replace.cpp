@@ -784,7 +784,7 @@ random_variable_order(const net_t& net)
   for (unsigned i = 0; i < net.inputs_w_order.size(); ++i) { permutation.push_back(i); }
 
   std::random_device rd;
-  std::mt19937 gen(rd());
+  std::mt19937 gen(10);
 
   std::shuffle(permutation.begin(), permutation.end(), gen);
 
@@ -805,6 +805,7 @@ get_new_order(const variable_order vo, net_t& net_0, net_t& net_1){
   switch (vo) {
   case variable_order::INPUT:
     // Keep as is
+    for(auto it = net_0.inputs_w_order.begin(); it != net_0.inputs_w_order.end(); ++it) {new_ordering.push_back(it->first);}
     break;
   case variable_order::DF: {
     new_ordering = df_variable_order<df_policy>(net_0);
@@ -869,6 +870,7 @@ apply_variable_order(const variable_order vo, net_t& net_0, net_t& net_1)
 
   new_ordering = get_new_order(vo, net_0, net_1);
 
+  if (new_ordering.empty()) return;
   update_order(net_0, new_ordering);
   if (net_1.inputs_w_order.size() == net_0.inputs_w_order.size()) {
     update_order(net_1, new_ordering);
@@ -1198,113 +1200,6 @@ do_match_io_names(net_t& net_0, net_t& net_1)
 }
 
 // ============================================================================================== //
-// template <typename Adapter>
-// int
-// run_picotrav(int argc, char** argv)
-// {
-//   const bool should_exit = parse_input<parsing_policy>(argc, argv);
-//   if (should_exit) { return -1; }
-//
-//   if (file_0 == "") {
-//     std::cerr << "Input file(s) not specified\n";
-//     return -1;
-//   }
-//   const bool verify_networks = file_1 != "";
-//
-//   // =============================================================================================
-//   // Read file(s) and construct nets
-//   std::vector<node_t> nodes;
-//
-//   net_t net_0 = { .nodes = nodes };
-//   if (!construct_net(file_0, net_0)) return -1; // error has been printed
-//
-//   net_t net_1 = { .nodes = nodes };
-//
-//   if (verify_networks) {
-//     if (!construct_net(file_1, net_1)) return -1; // error has been printed
-//
-//     const bool inputs_match = net_0.inputs_w_order.size() == net_1.inputs_w_order.size();
-//     if (!inputs_match) {
-//       std::cerr << "Number of inputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
-//       return -1;
-//     }
-//
-//     const bool outputs_match = net_0.outputs_in_order.size() == net_1.outputs_in_order.size();
-//     if (!outputs_match) {
-//       std::cerr << "Number of outputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
-//       return -1;
-//     }
-//
-//     if (match_io_names) {
-//       if (!do_match_io_names(net_0, net_1)) { return -1; };
-//     }
-//   }
-//
-//   // Nanotrav sorts the output in ascending order by their level. The same is possible here, but
-//   // experiments show this at times decreases and other times increases the running time.
-//   //
-//   // So, well keep it simple by not doing so.
-//
-//   // Derive variable order
-//   apply_variable_order(var_order, net_0, net_1);
-//
-//   // ============================================================================================
-//   // Initialise BDD package manager
-//   const size_t varcount = net_0.inputs_w_order.size();
-//
-//   return run<Adapter>("Picotrav", varcount, [&](Adapter& adapter) {
-//     std::cout << json::field("variable order") << json::value(to_string(var_order)) << json::comma
-//               << json::endl;
-//     std::cout << json::endl;
-//
-//     // ============================================================================================
-//     // Construct BDD for first net
-//     time_duration total_time = 0;
-//
-//     std::cout << json::field("apply+not") << json::array_open << json::endl;
-//
-//     bdd_cache<Adapter> cache_0;
-//
-//     bool networks_equal = true;
-//
-//     const auto [errcode_0, time_0] = construct_net_bdd(file_0, net_0, cache_0, adapter);
-//
-//     if (errcode_0) { return errcode_0; }
-//     total_time += time_0;
-//
-//     // ============================================================================================
-//     // Construct BDD for second net (if any) and compare them
-//     if (verify_networks) {
-//       std::cout << json::comma << json::endl;
-//
-//       bdd_cache<Adapter> cache_1;
-//
-//       const auto [errcode_1, time_1] = construct_net_bdd(file_1, net_1, cache_1, adapter);
-//
-//       if (errcode_1) { return errcode_1; }
-//       total_time += time_1;
-//
-//       std::cout << json::endl;
-//       std::cout << json::array_close << json::comma << json::endl;
-//
-//       const auto [verified, time_eq] =
-//         verify_outputs<Adapter>(adapter, net_0, cache_0, net_1, cache_1);
-//
-//       networks_equal = verified;
-//       total_time += time_eq;
-//     } else {
-//       std::cout << json::endl;
-//       std::cout << json::array_close << json::comma << json::endl;
-//     }
-//
-//     std::cout << json::field("total time (ms)") << json::value(init_time + total_time)
-//               << json::endl;
-//
-//     if (verify_networks && !networks_equal) { return -1; }
-//     return 0;
-//   });
-// }
-// ============================================================================================== //
 template <typename Adapter>
 int
 run_picotrav(int argc, char** argv)
@@ -1351,16 +1246,17 @@ run_picotrav(int argc, char** argv)
   // experiments show this at times decreases and other times increases the running time.
   //
   // So, well keep it simple by not doing so.
+  std::vector<unsigned> order1 = get_new_order(variable_order::INPUT, net_0, net_1);
 
   // Derive variable order
-  apply_variable_order(variable_order::DF_LEVEL, net_0, net_1);
+  apply_variable_order(variable_order::INPUT, net_0, net_1);
 
   // ============================================================================================
   // Initialise BDD package manager
   const size_t varcount = net_0.inputs_w_order.size();
 
   return run<Adapter>("Picotrav replace", varcount, [&](Adapter& adapter) {
-    std::cout << json::field("variable order") << json::value(to_string(var_order)) << json::comma
+    std::cout << json::field("Replacement to order") << json::value(to_string(var_order)) << json::comma
               << json::endl;
     std::cout << json::endl;
 
@@ -1382,19 +1278,42 @@ run_picotrav(int argc, char** argv)
     std::cout << json::array_close << json::comma << json::endl;
 
    std::vector<unsigned> order = get_new_order(var_order, net_0, net_1);
+   std::vector<unsigned> order2 = get_new_order(variable_order::ZIP, net_0, net_1);
    Permutation p = Permutation(order);
+   p.print_it();
 
-   // typename Adapter::dd_t f = (*cache_0.begin()).second;
+   for(unsigned i : order1) {std::cout << i << "; ";}
+   std::cout << '\n';
+   for(unsigned i : order) {std::cout << i << "; ";}
+   std::cout << '\n';
 
    const time_point g_before = now();
     for (auto& [id, bdd] : cache_0) {
-      adapter.replace(bdd, p);
+      // adapter.print_dot(bdd, "beforeTESTTESTTEST.dot");
+      bdd = adapter.replace(bdd, p);
+      // adapter.print_dot(bdd, "TESTTESTTEST.dot");
     }
-   // adapter.replace(f, p);
    const time_point g_after = now();
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
     std::cout << json::field("time (ms)") << json::value(duration_ms(g_before, g_after)) << json::endl;
+
+  size_t sum_final_sizes = 0;
+  size_t max_final_size  = 0;
+  for (auto kv : cache_0) {
+    size_t nodecount = adapter.nodecount(kv.second);
+    sum_final_sizes += nodecount;
+    max_final_size = std::max(max_final_size, nodecount);
+  }
+
+  std::cout << json::field("final_diagrams") << json::brace_open << json::endl;
+  std::cout << json::field("size[max] (nodes)") << json::value(max_final_size) << json::comma
+            << json::endl;
+  std::cout << json::field("size[sum] (nodes)") << json::value(sum_final_sizes) << json::comma
+            << json::endl;
+  std::cout << json::field("allocated (nodes)") << json::value(adapter.allocated_nodes())
+            << json::endl;
+  std::cout << json::brace_close << json::comma << json::endl;
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
 
     std::cout << json::field("total time (ms)") << json::value(init_time + total_time)
