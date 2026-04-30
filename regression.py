@@ -71,7 +71,7 @@ class ApplyStrategy:
 
         # .tsv file with pairs of BDDs
         tsv_file = url_download(tsv_url)
-        os.rename(tsv_file, tsv_path(path))
+        os.rename(tsv_file, self._tsv_path(path))
         print("")
 
         # .zip file with binary encoding of BDDs
