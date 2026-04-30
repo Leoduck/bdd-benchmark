@@ -43,14 +43,20 @@ template <typename Adapter>
 typename Adapter::dd_t
 create_input(Adapter& adapter)
 {
-  typename Adapter::dd_t a = adapter.ithvar(N*2 + 1);
-  typename Adapter::dd_t b = adapter.nithvar(N*2 + 1);
+  const auto bot = adapter.build_node(false);
+  const auto top = adapter.build_node(true);
+
+  auto b = adapter.build_node(N*2 + 1, bot, top);
+  auto a = adapter.build_node(N*2 + 1, top, bot);
     for (int i = (N * 2-1); 0 <= i; i -= 2) {
-      a = adapter.ite(adapter.ithvar(i), adapter.ite(adapter.ithvar(i+1), b, adapter.top()), adapter.ite(adapter.ithvar(i+1), a, adapter.bot()));
-      b = adapter.ite(adapter.ithvar(i), adapter.ite(adapter.ithvar(i+1), b, adapter.top()), adapter.ite(adapter.ithvar(i+1), a, adapter.top()));
+      auto t1 = adapter.build_node(i+1, b, top);
+      auto t2 = adapter.build_node(i+1, a, bot);
+      auto t3 = adapter.build_node(i+1, a, top);
+      a = adapter.build_node(i, t1, t2);
+      b = adapter.build_node(i, t1, t3);
     }
-    b = adapter.ite(adapter.ithvar(0), b, a);
-  return b;
+    b = adapter.build_node(0, b, a);
+  return adapter.build();
 }
 
 template <typename Adapter>
@@ -73,13 +79,13 @@ run_memotest(int argc, char** argv)
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
 
     Permutation p = Permutation(N, 1, map_opt::MEMO_SPEC);
-    p.print_it();
+    // p.print_it();
 
-    adapter.print_dot(f, "beforeTESTTESTTEST.dot");
+    // adapter.print_dot(f, "beforeTESTTESTTEST.dot");
     const time_point g_before = now();
     f = adapter.replace(f, p);
     const time_point g_after = now();
-    adapter.print_dot(f, "TESTTESTTEST.dot");
+    // adapter.print_dot(f, "TESTTESTTEST.dot");
 
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;

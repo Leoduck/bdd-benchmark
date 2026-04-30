@@ -43,48 +43,22 @@ template <typename Adapter>
 typename Adapter::dd_t
 create_input(Adapter& adapter)
 {
-  const auto bot = adapter.bot();
-  const auto top = adapter.top();
+  const auto bot = adapter.build_node(false);
+  const auto top = adapter.build_node(true);
 
   auto a = top;
   auto b = top;
 
   for (int i = N-1; 0 <= i; --i) {
     const int a_var = 2 * i + 1;
-    a = adapter.ite(adapter.ithvar(a_var), bot, a);
+    a = adapter.build_node(a_var, bot, a);
 
     const int b_var = 2 * i;
-    b = adapter.ite(adapter.ithvar(b_var), b, a);
+    b = adapter.build_node(b_var, b, a);
   }
 
-  return b;
+  return adapter.build();
 }
-
-// ========================================================================== //
-// template <typename Adapter>
-// typename Adapter::dd_t
-// reverse_order(Adapter& adapter, typename Adapter::dd_t f)
-// {
-//   // TODO: generalise...
-//   bddPair* mapping = bdd_newpair();
-//
-//   std::vector<int> mapping_old;
-//   mapping_old.reserve(2*N);
-//   std::vector<int> mapping_new;
-//   mapping_new.reserve(2*N);
-//
-//   for (int i = 0; i < N; ++i) {
-//     mapping_old.push_back(2*i);
-//     mapping_new.push_back(2*N-(2*i)-1);
-//
-//     mapping_old.push_back(2*i+1);
-//     mapping_new.push_back(2*N-(2*i+1)-1);
-//   }
-//
-//   bdd_setpairs(mapping, mapping_old.data(), mapping_new.data(), 2*N);
-//
-//   return bdd_replace(f, mapping);
-// }
 
 // ========================================================================== //
 template <typename Adapter>
@@ -108,9 +82,11 @@ run_quadratic(int argc, char** argv)
 
     Permutation p = Permutation(varcount, 1, map_opt::REVERSE);
 
+    // adapter.print_dot(f, "beforeT.dot");
     const time_point g_before = now();
-    f = adapter.replace(f, p);
+    // f = adapter.replace(f, p);
     const time_point g_after = now();
+    // adapter.print_dot(f, "T.dot");
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
     std::cout << json::field("size (nodes)") << json::value(bdd_nodecount(f)) << json::comma << json::endl;

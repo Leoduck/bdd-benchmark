@@ -43,20 +43,19 @@ template <typename Adapter>
 typename Adapter::dd_t
 create_input(Adapter& adapter)
 {
-  const auto top = adapter.top();
+  const auto top = adapter.build_node(true);
+  const auto bot = adapter.build_node(false);
 
   auto a = top;
-  auto b = top;
 
   for (int i = N-1; 0 <= i; --i) {
     const int a_var = 2 * i;
     const int b_var = 2 * i + 1;
-
-    a = adapter.apply_xnor(adapter.ithvar(a_var), adapter.ithvar(b_var));
-    b = adapter.apply_and(a,b);
+    auto t1 = adapter.build_node(b_var, bot, a);
+    auto t2 = adapter.build_node(b_var, a, bot);
+    a = adapter.build_node(a_var, t2, t1);
   }
-
-  return b;
+  return adapter.build();
 }
 
 // ========================================================================== //
@@ -81,10 +80,11 @@ run_diamond(int argc, char** argv)
 
     Permutation p = Permutation(varcount, 1, map_opt::ODD_SPLIT);
 
-
+    // adapter.print_dot(f, "bT.dot");
     const time_point g_before = now();
     f = adapter.replace(f, p);
     const time_point g_after = now();
+    // adapter.print_dot(f, "T.dot");
 
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
