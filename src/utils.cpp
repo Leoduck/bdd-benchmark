@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstddef>
 #include <iostream>
 #include <random>
 #include <vector>
@@ -9,6 +10,7 @@ enum class map_opt : signed char {
     JUMP_DOWN = 2,
     ADJ_SWAP = 3,
     ODD_SPLIT = 4,
+    MEMO_SPEC = 5,
 };
 
 
@@ -92,12 +94,32 @@ public:
                 }
                 break;
             }
+            case map_opt::MEMO_SPEC : {
+                // Move all odd layers to the bottom
+                perm.resize(N*2+2);
+                  for (int i = 0; i < N*2+2; i++){
+                      perm[i] = i;
+                  };
+                int counter = N + 1;
+                for(int i = 1 ; i < (N*2 + 2) ; i += 1){
+                    if (i % 2 == 0) {perm[i] = i/2;}
+                    else if (i == N*2 +1) {perm[i] = ((i-1)/2) +1;} //last layer
+                    else { perm[i] = i + counter--;}
+                }
+                break;
+            }
         }
     }
 
   //identity (based on vector)
   Permutation(std::vector<unsigned> p){
     perm = p;
+  }
+
+  void print_it(){
+    std::cout << "permutation is: ";
+    for (size_t i = 0; i < perm.size(); ++i) {std::cout << i << ":" << perm[i] <<"; ";}
+    std::cout << '\n';
   }
 
   //perm is func :D
@@ -108,15 +130,15 @@ public:
 
 
 // For testing the permutations...
-// int main(int argc, char **argv){
-//   int N, seed;
-//   while(true) {
-//     std::cin >> N;
-//     std::cin >> seed;
-//     Permutation p = Permutation(N, seed, map_opt::ODD_SPLIT);
-//     for (int i = 0; i < N; i++) {
-//       std::cout << p(i) << ", ";
-//     }
-//     std::cout << '\n';
-//   }
-// }
+ // int main(int argc, char **argv){
+ //   int N, seed;
+ //   while(true) {
+ //     std::cin >> N;
+ //     std::cin >> seed;
+ //     Permutation p = Permutation(N, seed, map_opt::MEMO_SPEC);
+ //     for (int i = 0; i < N; i++) {
+ //       std::cout << p(i) << ", ";
+ //     }
+ //     std::cout << '\n';
+ //   }
+ // }
