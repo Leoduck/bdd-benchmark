@@ -51,39 +51,13 @@ create_input(Adapter& adapter)
   for (int i = N-1; 0 <= i; --i) {
     const int a_var = 2 * i;
     const int b_var = 2 * i + 1;
-    a = adapter.apply_xnor(adapter.ithvar(a_var), adapter.ithvar(b_var));
 
+    a = adapter.apply_xnor(adapter.ithvar(a_var), adapter.ithvar(b_var));
     b = adapter.apply_and(a,b);
   }
 
   return b;
 }
-
-// ========================================================================== //
-// template <typename Adapter>
-// typename Adapter::dd_t
-// reverse_order(Adapter& adapter, typename Adapter::dd_t f)
-// {
-//   // TODO: generalise...
-//   bddPair* mapping = bdd_newpair();
-//
-//   std::vector<int> mapping_old;
-//   mapping_old.reserve(2*N);
-//   std::vector<int> mapping_new;
-//   mapping_new.reserve(2*N);
-//
-//   for (int i = 0; i < N; ++i) {
-//     mapping_old.push_back(2*i);
-//     mapping_new.push_back(2*N-(2*i)-1);
-//
-//     mapping_old.push_back(2*i+1);
-//     mapping_new.push_back(2*N-(2*i+1)-1);
-//   }
-//
-//   bdd_setpairs(mapping, mapping_old.data(), mapping_new.data(), 2*N);
-//
-//   return bdd_replace(f, mapping);
-// }
 
 // ========================================================================== //
 template <typename Adapter>
@@ -95,7 +69,7 @@ run_diamond(int argc, char** argv)
 
   const int varcount = 2 * N;
 
-  return run<Adapter>("quadratic-reorder", varcount, [&](Adapter& adapter) {
+  return run<Adapter>("diamond-reorder", varcount, [&](Adapter& adapter) {
     const time_point f_before = now();
     typename Adapter::dd_t f = create_input(adapter);
     const time_point f_after = now();
@@ -107,16 +81,14 @@ run_diamond(int argc, char** argv)
 
     Permutation p = Permutation(varcount, 1, map_opt::ODD_SPLIT);
 
-    adapter.print_dot(f, "beforeTESTTESTTEST.dot");
 
     const time_point g_before = now();
     f = adapter.replace(f, p);
     const time_point g_after = now();
 
-    adapter.print_dot(f, "TESTTESTTEST.dot");
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
-    // std::cout << json::field("size (nodes)") << json::value(bdd_nodecount(g)) << json::comma << json::endl;
+    std::cout << json::field("size (nodes)") << json::value(bdd_nodecount(f)) << json::comma << json::endl;
     std::cout << json::field("time (ms)") << json::value(duration_ms(g_before, g_after)) << json::endl;
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
 
