@@ -113,7 +113,7 @@ run_quadratic(int argc, char** argv)
     const time_point g_after = now();
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
-    // std::cout << json::field("size (nodes)") << json::value(bdd_nodecount(g)) << json::comma << json::endl;
+    std::cout << json::field("size (nodes)") << json::value(bdd_nodecount(f)) << json::comma << json::endl;
     std::cout << json::field("time (ms)") << json::value(duration_ms(g_before, g_after)) << json::endl;
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
 
