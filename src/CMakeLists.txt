@@ -146,7 +146,7 @@ endmacro(link_extra)
 # Combinatorial Benchmarks
 add_benchmark(game-of-life)
 add_benchmark(hamiltonian)
-add_benchmark(queens)
+# add_benchmark(queens)
 add_benchmark(tic-tac-toe)
 
 # ---------------------------------------------------------------------------- #
@@ -172,12 +172,14 @@ add_benchmark(apply)
 add_bdd_benchmark(relprod)
 add_bcdd_benchmark(relprod)
 
-__add_benchmark(adiar adiar replace bdd)
-__add_benchmark(buddy buddy replace bdd)
+# __add_benchmark(adiar adiar replace bdd)
+# __add_benchmark(buddy buddy replace bdd)
 
 __add_benchmark(adiar adiar replace_quadratic bdd)
 __add_benchmark(buddy buddy replace_quadratic bdd)
 __add_benchmark(buddy buddy replace_quadratic_1 bdd)
+
+__add_benchmark(adiar adiar exists_quadratic bdd)
 
 __add_benchmark(adiar adiar diamond_replace bdd)
 __add_benchmark(buddy buddy diamond_replace bdd)
