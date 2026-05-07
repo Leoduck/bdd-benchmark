@@ -79,7 +79,7 @@ import os
 
 epfl_spec_t    = Enum('epfl_spec_t',    ['arithmetic', 'random_control'])
 epfl_opt_t     = Enum('epfl_opt_t',     ['depth', 'size'])
-picotrav_opt_t = Enum('picotrav_opt_t', ['DF', 'INPUT', 'LEVEL', 'LEVEL_DF', 'RANDOM', 'FUJITA', 'FANIN', 'FANIN_DF'])
+picotrav_opt_t = Enum('picotrav_opt_t', ['DF', 'INPUT', 'LEVEL', 'LEVEL_DF', 'RANDOM', 'FUJITA', 'FANIN', 'FANIN_DF', 'ZIP'])
 
 def picotrav__spec(spec_t, circuit_name):
     return f"../epfl/{spec_t.name}/{circuit_name}.blif"
