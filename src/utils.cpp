@@ -11,6 +11,7 @@ enum class map_opt : signed char {
     ADJ_SWAP = 3,
     ODD_SPLIT = 4,
     MEMO_SPEC = 5,
+    JUMP_UP = 6
 };
 
 
@@ -21,7 +22,7 @@ private:
 
 public:
     //random seeded permutation
-    Permutation(int N, int seed, map_opt po){
+    Permutation(int N, int seed, map_opt po, int number_jumps){
         perm.resize(N);
         for (int i = 0; i < N; i++){
             perm[i] = i;
@@ -60,17 +61,11 @@ public:
                 for (int i = 0; i < N; i++){
                     perm[i] = 2*i;
                 };
-                //plan gen random number -> amount of jumps to do
+                //plan: pass amount of jumps to do
                 //then segment map into that many parts
                 //do a random jump in each
-                std::uniform_int_distribution<int> dis(0, (N/3));
-                int number_of_jumps = dis(gen);
-                //std::cout << "number 0f jumps = " << number_of_jumps << "\n";
-                int segment_size = N/number_of_jumps;
-                //std::cout << "segment size = " << segment_size  << "\n";
+                int segment_size = N/number_jumps;
                 for (int i = 0; i < N; i += segment_size){
-                    //std::cout << "start of segment " << i  << "\n";
-                    //std::cout << "end of segment " << i+segment_size-1  << "\n";
                     std::uniform_int_distribution<int> tdis(i, i+segment_size-1);
                     int j1 = tdis(gen);
                     int j2 = tdis(gen);
@@ -79,9 +74,28 @@ public:
                 }
                 break;
             }
+
+            case map_opt::JUMP_UP :{
+                //assume only even layers present in bdd
+                for (int i = 0; i < N; i++){
+                    perm[i] = 2*i;
+                };
+                //plan: pass amount of jumps to do
+                //then segment map into that many parts
+                //do a random jump up in each
+                int segment_size = N/number_jumps;
+                for (int i = 0; i < N; i += segment_size){
+                    std::uniform_int_distribution<int> tdis(i, i+segment_size-1);
+                    int j1 = tdis(gen);
+                    int j2 = tdis(gen);
+                    int start = std::max(j1,j2);
+                    perm[start] = (j1 == start) ? j2*2+1 : j1*2+1 ;
+                }
+                break;
+            }
             case map_opt::ADJ_SWAP : {
                 // pick a number of layers randomly 
-                //swap them with their lower? neighbour
+                //swap them with their lower neighbour
                 //number of swaps
                 std::uniform_int_distribution<int> dis(0, (N/2)-1);
                 int number_of_swaps = dis(gen);
