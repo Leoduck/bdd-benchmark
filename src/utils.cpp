@@ -22,7 +22,7 @@ private:
 
 public:
     //random seeded permutation
-    Permutation(int N, int seed, map_opt po, int number_jumps){
+    Permutation(int N, int seed, map_opt po, int number_jumps=0){
         perm.resize(N);
         for (int i = 0; i < N; i++){
             perm[i] = i;
