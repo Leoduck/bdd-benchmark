@@ -69,40 +69,40 @@ if (BUDDY)
   add_subdirectory (external/buddy buddy EXCLUDE_FROM_ALL)
 endif (BUDDY)
 
-# Cal Package (Jagesh Sanghavi, Rajeev Ranjan et al. - University of California, United States of America)
-option(CAL "Build for CAL" ON)
-if (CAL)
-  add_subdirectory (external/cal cal EXCLUDE_FROM_ALL)
-endif (CAL)
-
-# CUDD Package (Fabio Somenzi - University of Colorado Boulder, United States of America)
-option(CUDD "Build for CUDD" ON)
-if (CUDD)
-  add_subdirectory(external/cudd cudd EXCLUDE_FROM_ALL)
-endif (CUDD)
-
-# Biodivine/LibBDD (Samuel Pastva et al. - Institute of Science and Technology Austria)
-option(LIBBDD "Build for LibBDD" ON)
-if (LIBBDD)
-  add_subdirectory(external/lib-bdd-ffi lib-bdd-ffi EXCLUDE_FROM_ALL)
-endif (LIBBDD)
-
-# OxiDD (Nils Husung et al. - Saarland University, Germany and Eindhoven University of Technology, The Netherlands)
-option(OXIDD "Build for OxiDD" ON)
-if (OXIDD)
-  add_subdirectory(external/oxidd oxidd EXCLUDE_FROM_ALL)
-endif (OXIDD)
-
-# Sylvan Package (Tom van Dijk - University of Twente, Netherlands)
-option(SYLVAN "Build for Sylvan (Saarland & Eindhoven Univesity, Germany & Netherlands)" ON)
-if (SYLVAN)
-  if (BDD_BENCHMARK_STATS)
-    set(SYLVAN_STATS ON)
-  endif(BDD_BENCHMARK_STATS)
-
-  add_subdirectory (external/sylvan sylvan EXCLUDE_FROM_ALL)
-endif (SYLVAN)
-
+## Cal Package (Jagesh Sanghavi, Rajeev Ranjan et al. - University of California, United States of America)
+#option(CAL "Build for CAL" ON)
+#if (CAL)
+#  add_subdirectory (external/cal cal EXCLUDE_FROM_ALL)
+#endif (CAL)
+#
+## CUDD Package (Fabio Somenzi - University of Colorado Boulder, United States of America)
+#option(CUDD "Build for CUDD" ON)
+#if (CUDD)
+#  add_subdirectory(external/cudd cudd EXCLUDE_FROM_ALL)
+#endif (CUDD)
+#
+## Biodivine/LibBDD (Samuel Pastva et al. - Institute of Science and Technology Austria)
+#option(LIBBDD "Build for LibBDD" ON)
+#if (LIBBDD)
+#  add_subdirectory(external/lib-bdd-ffi lib-bdd-ffi EXCLUDE_FROM_ALL)
+#endif (LIBBDD)
+#
+## OxiDD (Nils Husung et al. - Saarland University, Germany and Eindhoven University of Technology, The Netherlands)
+#option(OXIDD "Build for OxiDD" ON)
+#if (OXIDD)
+#  add_subdirectory(external/oxidd oxidd EXCLUDE_FROM_ALL)
+#endif (OXIDD)
+#
+## Sylvan Package (Tom van Dijk - University of Twente, Netherlands)
+#option(SYLVAN "Build for Sylvan (Saarland & Eindhoven Univesity, Germany & Netherlands)" ON)
+#if (SYLVAN)
+#  if (BDD_BENCHMARK_STATS)
+#    set(SYLVAN_STATS ON)
+#  endif(BDD_BENCHMARK_STATS)
+#
+#  add_subdirectory (external/sylvan sylvan EXCLUDE_FROM_ALL)
+#endif (SYLVAN)
+#
 # ---------------------------------------------------------------------------- #
 # BLIF parser
 add_subdirectory (external/blifparse libblifparse EXCLUDE_FROM_ALL)

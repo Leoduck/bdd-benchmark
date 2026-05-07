@@ -2,6 +2,7 @@
 #include <cassert>
 
 // Data Structures
+#include <cstdio>
 #include <iostream>
 #include <optional>
 #include <unordered_map>
@@ -805,7 +806,8 @@ get_new_order(const variable_order vo, net_t& net_0, net_t& net_1){
   switch (vo) {
   case variable_order::INPUT:
     // Keep as is
-    for(auto it = net_0.inputs_w_order.begin(); it != net_0.inputs_w_order.end(); ++it) {new_ordering.push_back(it->first);}
+    for (size_t i = 0 ; i < net_0.inputs_w_order.size(); i++){new_ordering.push_back(i);}
+    // for(auto kv : net_0.inputs_w_order) {new_ordering.push_back(kv.second);}
     break;
   case variable_order::DF: {
     new_ordering = df_variable_order<df_policy>(net_0);
@@ -1199,6 +1201,16 @@ do_match_io_names(net_t& net_0, net_t& net_1)
   return true;
 }
 
+
+std::vector<unsigned>
+make_order_to_org_variables(net_t net, std::vector<unsigned> order){
+  std::vector<unsigned> remapped = order;
+  for (auto kv : net.inputs_w_order) {
+    remapped[kv.second] = order[kv.first];
+  }
+  return remapped; 
+}
+
 // ============================================================================================== //
 template <typename Adapter>
 int
@@ -1222,34 +1234,35 @@ run_picotrav(int argc, char** argv)
 
   net_t net_1 = { .nodes = nodes };
 
-  if (verify_networks) {
-    if (!construct_net(file_1, net_1)) return -1; // error has been printed
+  // For testing that the results are what we expect
+  // net_t net_2 = net_0;
+  // net_t net_3 = { .nodes = nodes };
 
-    const bool inputs_match = net_0.inputs_w_order.size() == net_1.inputs_w_order.size();
-    if (!inputs_match) {
-      std::cerr << "Number of inputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
-      return -1;
-    }
-
-    const bool outputs_match = net_0.outputs_in_order.size() == net_1.outputs_in_order.size();
-    if (!outputs_match) {
-      std::cerr << "Number of outputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
-      return -1;
-    }
-
-    if (match_io_names) {
-      if (!do_match_io_names(net_0, net_1)) { return -1; };
-    }
-  }
-
-  // Nanotrav sorts the output in ascending order by their level. The same is possible here, but
-  // experiments show this at times decreases and other times increases the running time.
+  // if (verify_networks) {
+  //   if (!construct_net(file_1, net_1)) return -1; // error has been printed
   //
-  // So, well keep it simple by not doing so.
-  std::vector<unsigned> order1 = get_new_order(variable_order::INPUT, net_0, net_1);
+  //   const bool inputs_match = net_0.inputs_w_order.size() == net_1.inputs_w_order.size();
+  //   if (!inputs_match) {
+  //     std::cerr << "Number of inputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
+  //     return -1;
+  //   }
+  //
+  //   const bool outputs_match = net_0.outputs_in_order.size() == net_1.outputs_in_order.size();
+  //   if (!outputs_match) {
+  //     std::cerr << "Number of outputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
+  //     return -1;
+  //   }
+  //
+  //   if (match_io_names) {
+  //     if (!do_match_io_names(net_0, net_1)) { return -1; };
+  //   }
+  // }
+  // Compute the variable order beforehand
+  std::vector<unsigned> pv = get_new_order(var_order, net_0, net_1);
 
-  // Derive variable order
-  apply_variable_order(variable_order::INPUT, net_0, net_1);
+  // Apply DF_LEVEL, fastest to build?
+  apply_variable_order(variable_order::DF_LEVEL, net_0, net_1);
+
 
   // ============================================================================================
   // Initialise BDD package manager
@@ -1271,32 +1284,22 @@ run_picotrav(int argc, char** argv)
     bool networks_equal = true;
 
     const auto [errcode_0, time_0] = construct_net_bdd(file_0, net_0, cache_0, adapter);
-
     if (errcode_0) { return errcode_0; }
+
     total_time += time_0;
     std::cout << json::endl;
     std::cout << json::array_close << json::comma << json::endl;
 
-   std::vector<unsigned> order = get_new_order(var_order, net_0, net_1);
-   std::vector<unsigned> order2 = get_new_order(variable_order::ZIP, net_0, net_1);
-   Permutation p = Permutation(order);
-   p.print_it();
+   Permutation p = Permutation(make_order_to_org_variables(net_0, pv));
 
-   for(unsigned i : order1) {std::cout << i << "; ";}
-   std::cout << '\n';
-   for(unsigned i : order) {std::cout << i << "; ";}
-   std::cout << '\n';
-
-   const time_point g_before = now();
+   const time_point f_before = now();
     for (auto& [id, bdd] : cache_0) {
-      // adapter.print_dot(bdd, "beforeTESTTESTTEST.dot");
       bdd = adapter.replace(bdd, p);
-      // adapter.print_dot(bdd, "TESTTESTTEST.dot");
     }
-   const time_point g_after = now();
+   const time_point f_after = now();
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
-    std::cout << json::field("time (ms)") << json::value(duration_ms(g_before, g_after)) << json::endl;
+    std::cout << json::field("time (ms)") << json::value(duration_ms(f_before, f_after)) << json::endl;
 
   size_t sum_final_sizes = 0;
   size_t max_final_size  = 0;
@@ -1315,6 +1318,18 @@ run_picotrav(int argc, char** argv)
             << json::endl;
   std::cout << json::brace_close << json::comma << json::endl;
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
+
+    // apply_variable_order(var_order, net_2, net_3);
+    // bdd_cache<Adapter> cache_1;
+    // const auto [errcode_1, time_1] = construct_net_bdd(file_0, net_2, cache_1, adapter);
+    // if (errcode_1) { return errcode_1; }
+    // total_time += time_1;
+    // std::cout << "Check equality:\n";
+    // for (auto& [id, bdd] : cache_0) {
+    //   std::cout << "is equal? " << (bdd == cache_1.at(id)) << '\n';
+    //   // adapter.print_dot(bdd, std::to_string(id) + "c1.dot");
+    //   // adapter.print_dot(cache_1.at(id), std::to_string(id) + "c2.dot");
+    // }
 
     std::cout << json::field("total time (ms)") << json::value(init_time + total_time)
               << json::endl;
