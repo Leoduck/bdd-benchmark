@@ -11,8 +11,95 @@ enum class map_opt : signed char {
     ADJ_SWAP = 3,
     ODD_SPLIT = 4,
     MEMO_SPEC = 5,
-    JUMP_UP = 6
+    JUMP_UP = 6,
+    ERROR = 7
 };
+
+enum class instance_opt : signed char {
+    QUADRATIC = 0,
+    DIAMOND = 1,
+    MEMO = 2,
+    ERROR = 3
+};
+
+instance_opt
+inst_o_of_string(std::string t){
+    if (t == "quadratic" || t == "QUADRATIC") {return instance_opt::QUADRATIC;}
+    if (t == "diamond" || t == "DIAMOND") {return instance_opt::DIAMOND;}
+    if (t == "memo" || t == "MEMO") {return instance_opt::MEMO;}
+    return instance_opt::ERROR; //invalid   
+}
+
+map_opt
+mo_of_string(std::string o){
+  if (o == "random" || o == "RANDOM") {return map_opt::RANDOM;}
+  if (o == "reverse" || o == "REVERSE") {return map_opt::REVERSE;}
+  if (o == "jump_down" || o == "JUMP_DOWN") {return map_opt::JUMP_DOWN;}
+  if (o == "adj_swap" || o == "ADJ_SWAP") {return map_opt::ADJ_SWAP;}
+  if (o == "jump_up" || o == "JUMP_UP") {return map_opt::JUMP_UP;}
+  if (o == "odd_split" || o == "ODD_SPLIT") {return map_opt::ODD_SPLIT;}
+  if (o == "memo_spec" || o == "MEMO_SPEC") {return map_opt::MEMO_SPEC;}
+  return map_opt::ERROR; // invalid! 
+} 
+
+template <typename Adapter>
+typename Adapter::dd_t
+create_diamond(Adapter& adapter, int N)
+{
+  const auto top = adapter.build_node(true);
+  const auto bot = adapter.build_node(false);
+
+  auto a = top;
+
+  for (int i = N-1; 0 <= i; --i) {
+    const int a_var = 2 * i;
+    const int b_var = 2 * i + 1;
+    auto t1 = adapter.build_node(b_var, bot, a);
+    auto t2 = adapter.build_node(b_var, a, bot);
+    a = adapter.build_node(a_var, t2, t1);
+  }
+  return adapter.build();
+}
+template <typename Adapter>
+typename Adapter::dd_t
+create_memo(Adapter& adapter, int N)
+{
+  const auto bot = adapter.build_node(false);
+  const auto top = adapter.build_node(true);
+
+  auto b = adapter.build_node(N*2 + 1, bot, top);
+  auto a = adapter.build_node(N*2 + 1, top, bot);
+    for (int i = (N * 2-1); 0 <= i; i -= 2) {
+      auto t1 = adapter.build_node(i+1, b, top);
+      auto t2 = adapter.build_node(i+1, a, bot);
+      auto t3 = adapter.build_node(i+1, a, top);
+      a = adapter.build_node(i, t1, t2);
+      b = adapter.build_node(i, t1, t3);
+    }
+    b = adapter.build_node(0, b, a);
+  return adapter.build();
+}
+
+template <typename Adapter>
+typename Adapter::dd_t
+create_quadratic(Adapter& adapter, int N)
+{
+  const auto bot = adapter.build_node(false);
+  const auto top = adapter.build_node(true);
+
+  auto a = top;
+  auto b = top;
+
+  for (int i = N-1; 0 <= i; --i) {
+    const int a_var = 2 * i + 1;
+    a = adapter.build_node(a_var, bot, a);
+
+    const int b_var = 2 * i;
+    b = adapter.build_node(b_var, b, a);
+  }
+
+  return adapter.build();
+}
 
 
 class Permutation {
@@ -122,6 +209,7 @@ public:
                 }
                 break;
             }
+            case map_opt::ERROR : { break; }
         }
     }
 

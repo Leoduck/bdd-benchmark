@@ -172,8 +172,8 @@ add_benchmark(apply)
 add_bdd_benchmark(relprod)
 add_bcdd_benchmark(relprod)
 
-# __add_benchmark(adiar adiar replace bdd)
-# __add_benchmark(buddy buddy replace bdd)
+__add_benchmark(adiar adiar replace bdd)
+__add_benchmark(buddy buddy replace bdd)
 
 __add_benchmark(adiar adiar replace_quadratic bdd)
 __add_benchmark(buddy buddy replace_quadratic bdd)

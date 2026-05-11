@@ -12,7 +12,6 @@
 #include "common/input.h"
 #include "common/libbdd_parser.h"
 
-#include "queensbuilder.cpp"
 #include "common/utils.cpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -21,15 +20,23 @@
 
 unsigned int seed = 987654321u;
 
+int N = 5;
+int segments = 5;
+map_opt o = map_opt::REVERSE;
+instance_opt t = instance_opt::QUADRATIC;
+
 class parsing_policy
 {
 public:
-  static constexpr std::string_view name = "Replace random";
-  static constexpr std::string_view args = "n:s:";
+  static constexpr std::string_view name = "Replace_special_case_bench";
+  static constexpr std::string_view args = "n:o:s:t:";
 
-  static constexpr std::string_view help_text = 
-    "        -s SEED               Seed used for this run\n"
-    "        -n n         [8]      Size of board";
+  static constexpr std::string_view help_text =
+  "        -n N          N for chosen instance (e.g. #pairs for quadratic) \n"
+  "        -o ORDER      the order to build and apply via replace (e.g. RANDOM)\n"
+  "        -s Seed       Seed for the randomness in order \n"
+  "        -j segments   Number of segments to split some special cases \n"
+  "        -t bdd type   the shape of BDD to perform replace on (e.g. QUADRATIC)";
 
   static inline bool
   parse_input(const int c, const char* arg)
@@ -38,13 +45,38 @@ public:
     case 'n': {
       N = std::stoi(arg);
       if (N <= 0) {
-        std::cerr << "  Must specify positive board size (-n)\n";
+        std::cerr << "  Must specify positive N\n";
         return true;
       }
       return false;
     }
     case 's': {
       seed = std::stoul(arg);
+      return false;
+    }
+    case 'j': {
+      segments = std::stoi(arg);
+      if (segments <= N) {
+        std::cerr << "  Must have more variables (N) than segments\n";
+        return true;
+      }
+      return false;
+    }
+    case 'o' : {
+      o = mo_of_string(arg);
+      if (o == map_opt::ERROR) {
+        std::cerr << "unknown order " << arg << "\n";
+        return true;
+      }
+      return false;
+    }
+
+    case 't' : {
+      t = inst_o_of_string(arg);
+      if (t == instance_opt::ERROR){
+        std::cerr << "unknown bdd type " << arg << "\n";
+        return true;
+      }
       return false;
     }
     default: return true;
@@ -57,23 +89,36 @@ int run_replace(int argc, char** argv) {
   bool should_exit = parse_input<parsing_policy>(argc, argv);
   if (should_exit) { return -1; }
 
+    int varcount = 0; 
+    switch(t) {
+    case instance_opt::DIAMOND: {varcount = N*2; break;}
+    case instance_opt::QUADRATIC: {varcount = N*2; break;}
+    case instance_opt::MEMO: {varcount = N; break;}
+    case instance_opt::ERROR: {return -1;}
+    }
   // =============================================================================================
   // Initialize BDD package
-  return run<Adapter>("replace", N * N, [&](Adapter& adapter) {
+  return run<Adapter>("replace", varcount, [&](Adapter& adapter) {
 
     std::cout << json::field("construction") << json::brace_open << json::endl << json::flush;
 
 #ifdef BDD_BENCHMARK_STATS
     std::cout << json::field("intermediate results") << json::brace_open << json::endl;
 #endif
+    typename Adapter::dd_t dd;
 
     size_t total_time = 0;
-
     const time_point t1        = now();
-    typename Adapter::dd_t res = queens_B(adapter);
+    switch(t) {
+    case instance_opt::DIAMOND: {dd = create_diamond(adapter, N);  break;}
+    case instance_opt::QUADRATIC: {dd = create_quadratic(adapter, N); break;}
+    case instance_opt::MEMO: {dd = create_memo(adapter, N); break;}
+    case instance_opt::ERROR: {return -1;}
+    }
     const time_point t2        = now();
 
     const time_duration construction_time = duration_ms(t1, t2);
+    total_time += construction_time;
 
 #ifdef BDD_BENCHMARK_STATS
     std::cout << json::brace_close << json::comma << json::endl;
@@ -83,7 +128,7 @@ int run_replace(int argc, char** argv) {
               << json::endl;
 #endif // BDD_BENCHMARK_STATS
 
-    std::cout << json::field("final size (nodes)") << json::value(adapter.nodecount(res))
+    std::cout << json::field("final size (nodes)") << json::value(adapter.nodecount(dd))
               << json::comma << json::endl;
     std::cout << json::field("time (ms)") << json::value(construction_time) << json::endl;
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
@@ -95,18 +140,19 @@ int run_replace(int argc, char** argv) {
     std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
 
 
-    Permutation p = Permutation(N*N, seed, map_opt::RANDOM);
+    Permutation p = Permutation(varcount, seed, o, segments);
 
     const time_point t_replace_before = now();
-    res = adapter.replace(res, p);
+    dd = adapter.replace(dd, p);
     const time_point t_replace_after = now();
+    // adapter.print_dot(dd, "T.dot");
 
     const size_t replace_time = duration_ms(t_replace_before, t_replace_after);
     total_time += replace_time;
 
-    std::cout << json::field("size (nodes)") << adapter.nodecount(res) << json::comma
+    std::cout << json::field("size (nodes)") << adapter.nodecount(dd) << json::comma
               << json::endl;
-    std::cout << json::field("satcount") << adapter.satcount(res) << json::comma << json::endl;
+    std::cout << json::field("satcount") << adapter.satcount(dd) << json::comma << json::endl;
     std::cout << json::field("time (ms)") << replace_time << json::endl;
 
     std::cout << json::brace_close << json::comma << json::endl;
