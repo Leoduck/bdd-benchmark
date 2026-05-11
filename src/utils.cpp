@@ -135,6 +135,11 @@ public:
     for (size_t i = 0; i < perm.size(); ++i) {std::cout << i << ":" << perm[i] <<"; ";}
     std::cout << '\n';
   }
+  void print_it(size_t limit){
+    std::cout << "permutation is: ";
+    for (size_t i = 0; i < perm.size() && i < limit; ++i) {std::cout << i << ":" << perm[i] <<"; ";}
+    std::cout << '\n';
+  }
 
   //perm is func :D
   int operator()(int x) const {

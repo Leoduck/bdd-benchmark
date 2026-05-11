@@ -1259,6 +1259,11 @@ run_picotrav(int argc, char** argv)
   // }
   // Compute the variable order beforehand
   std::vector<unsigned> pv = get_new_order(var_order, net_0, net_1);
+  std::vector<unsigned> pdf_level = get_new_order(variable_order::DF_LEVEL, net_0, net_1);
+  std::cout << "Variable order" << to_string(var_order) << ":\n";
+  Permutation(pv).print_it(10);
+  std::cout << "Construct DF_level:\n";
+  Permutation(pdf_level).print_it(10);
 
   // Apply DF_LEVEL, fastest to build?
   apply_variable_order(variable_order::DF_LEVEL, net_0, net_1);
@@ -1288,7 +1293,7 @@ run_picotrav(int argc, char** argv)
 
     total_time += time_0;
     std::cout << json::endl;
-    std::cout << json::array_close << json::comma << json::endl;
+    std::cout << json::array_close << json::comma << json::endl << json::flush;
 
    Permutation p = Permutation(make_order_to_org_variables(net_0, pv));
 
