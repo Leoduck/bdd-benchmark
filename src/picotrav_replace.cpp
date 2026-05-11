@@ -22,7 +22,7 @@
 #include "common/adapter.h"
 #include "common/chrono.h"
 #include "common/input.h"
-#include "utils.cpp"
+#include "common/utils.cpp"
 
 // ========================================================================== //
 // Parsing input parameters

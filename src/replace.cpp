@@ -13,7 +13,7 @@
 #include "common/libbdd_parser.h"
 
 #include "queensbuilder.cpp"
-#include "utils.cpp"
+#include "common/utils.cpp"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                        INPUT PARSING                                           //
