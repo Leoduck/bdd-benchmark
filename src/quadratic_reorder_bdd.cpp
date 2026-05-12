@@ -84,7 +84,7 @@ run_quadratic(int argc, char** argv)
 
     // adapter.print_dot(f, "beforeT.dot");
     const time_point g_before = now();
-    // f = adapter.replace(f, p);
+    f = adapter.replace(f, p);
     const time_point g_after = now();
     // adapter.print_dot(f, "T.dot");
 
