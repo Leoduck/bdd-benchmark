@@ -124,14 +124,6 @@ int run_replace(int argc, char** argv) {
     const time_duration construction_time = duration_ms(t1, t2);
     total_time += construction_time;
 
-#ifdef BDD_BENCHMARK_STATS
-    std::cout << json::brace_close << json::comma << json::endl;
-    std::cout << json::field("total processed (nodes)") << json::value(total_nodes) << json::comma
-              << json::endl;
-    std::cout << json::field("largest size (nodes)") << json::value(largest_bdd) << json::comma
-              << json::endl;
-#endif // BDD_BENCHMARK_STATS
-
     std::cout << json::field("final size (nodes)") << json::value(adapter.nodecount(dd))
               << json::comma << json::endl;
     std::cout << json::field("time (ms)") << json::value(construction_time) << json::endl;
