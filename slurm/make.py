@@ -104,6 +104,47 @@ relprod_dir_t = Enum('relprod_dir_t', ['NEXT', 'PREV'])
 def relnext__args(path, magnitude, dir_t):
     return f"-r ../mcnet/mcc/{path}/relation.bdd -s ../mcnet/mcc/{path}/states_{magnitude}.bdd -o {dir_t.name}"
 
+
+# special cases
+"""
+    "replace": {
+            dd_t.bdd: [
+                [ [ 0, 0, 30], "-n 10 -t diamond -o ADJ_SWAP  -j 10" ],
+                [ [ 0, 0, 30], "-n 10 -t diamond -o JUMP_DOWN -j 10" ],
+                [ [ 0, 0, 30], "-n 10 -t diamond -o JUMP_UP   -j 10" ],
+                ]
+            },
+"""
+small_instance = [2000, 20, 2000]
+mid_instance = [20000, 25, 10000]
+large_instance = [40000, 30, 30000]
+names = ["quadratic", "diamond", "memo"]
+test = [small_instance, mid_instance, large_instance]
+times = [[0,0,5], [0,0,10], [0,1,0]]
+step = 5
+m = {}
+l = []
+for i in range(len(names)) :
+    #loop over instance
+    inst = names[i]
+    for j in range(len(test)) :
+        #loop over size
+        n = test[j][i] # for both 0 would be small instance of quad
+        max_jumps = n//3   # // is floor division 
+        max_swaps = n//2
+        for k in range(1,step+1) : # should be 1 to step
+            number_jumps = max_jumps//step * k
+            number_swaps = max_swaps//step * k
+            s = f"-n {n} -t {inst} -o ADJ_SWAP -j {number_swaps}"
+            jd = f"-n {n} -t {inst} -o JUMP_DOWN -j {number_jumps}"
+            ju = f"-n {n} -t {inst} -o JUMP_UP -j {number_jumps}"
+            l.append( [times[j], s] )
+            l.append( [times[j], jd] )
+            l.append( [times[j], ju] )
+m.update({dd_t.bdd : l})
+
+
+
 # --------------------------------------------------------------------------- #
 # Since we are testing BDD packages over such a wide spectrum, we have some
 # instances that require several days of computaiton time (closing into the 15
@@ -215,13 +256,10 @@ BENCHMARKS = {
             [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.RANDOM) ], 
         ], 
     },
-    "replace": {
-            dd_t.bdd: [
-                [ [ 0, 0, 30], "-n 10 -t diamond -o ADJ_SWAP  -j 10" ],
-                [ [ 0, 0, 30], "-n 10 -t diamond -o JUMP_DOWN -j 10" ],
-                [ [ 0, 0, 30], "-n 10 -t diamond -o JUMP_UP   -j 10" ],
-                ]
-            },
+
+    
+    "replace": m,
+    
     "memo_replace": {
             dd_t.bdd: [
                 [ [ 0, 0, 30], "-n 10" ],
