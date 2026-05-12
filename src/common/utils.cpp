@@ -151,7 +151,6 @@ public:
                 };
                 // New plan make maximal jump in segments
                 int segment_size = (N*2)/number_jumps;
-                std::cout << "seg_size" << segment_size << '\n';
                 for (int i = 0; i < number_jumps; i++) {
                     int from = i * segment_size;
                     int to = from + segment_size - 1;
@@ -187,7 +186,6 @@ public:
                     perm[i] = i;
                 };
                 int segment_size = (N*2)/number_jumps;
-                std::cout << "seg_size" << segment_size << '\n';
                 for (int i = 0; i < number_jumps; i++) {
                     int to = i * segment_size;
                     int from = to + segment_size;
