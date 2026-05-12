@@ -21,7 +21,8 @@
 unsigned int seed = 987654321u;
 
 int N = 5;
-int segments = 5;
+int segments = 2;
+
 map_opt o = map_opt::REVERSE;
 instance_opt t = instance_opt::QUADRATIC;
 
@@ -29,7 +30,7 @@ class parsing_policy
 {
 public:
   static constexpr std::string_view name = "Replace_special_case_bench";
-  static constexpr std::string_view args = "n:o:s:t:";
+  static constexpr std::string_view args = "n:o:s:t:j:";
 
   static constexpr std::string_view help_text =
   "        -n N          N for chosen instance (e.g. #pairs for quadratic) \n"
@@ -56,7 +57,7 @@ public:
     }
     case 'j': {
       segments = std::stoi(arg);
-      if (segments <= N) {
+      if (segments > N) {
         std::cerr << "  Must have more variables (N) than segments\n";
         return true;
       }
@@ -96,6 +97,9 @@ int run_replace(int argc, char** argv) {
     case instance_opt::MEMO: {varcount = N; break;}
     case instance_opt::ERROR: {return -1;}
     }
+    int scale = 1;
+    if (o == map_opt::JUMP_DOWN || o == map_opt::JUMP_UP) scale = 2;
+
   // =============================================================================================
   // Initialize BDD package
   return run<Adapter>("replace", varcount, [&](Adapter& adapter) {
@@ -108,14 +112,14 @@ int run_replace(int argc, char** argv) {
     typename Adapter::dd_t dd;
 
     size_t total_time = 0;
-    const time_point t1        = now();
+    const time_point t1 = now();
     switch(t) {
-    case instance_opt::DIAMOND: {dd = create_diamond(adapter, N);  break;}
-    case instance_opt::QUADRATIC: {dd = create_quadratic(adapter, N); break;}
-    case instance_opt::MEMO: {dd = create_memo(adapter, N); break;}
+    case instance_opt::DIAMOND: {dd = create_diamond(adapter, N, scale);  break;}
+    case instance_opt::QUADRATIC: {dd = create_quadratic(adapter, N, scale); break;}
+    case instance_opt::MEMO: {dd = create_memo(adapter, N, scale); break;}
     case instance_opt::ERROR: {return -1;}
     }
-    const time_point t2        = now();
+    const time_point t2 = now();
 
     const time_duration construction_time = duration_ms(t1, t2);
     total_time += construction_time;
@@ -139,13 +143,16 @@ int run_replace(int argc, char** argv) {
 
     std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
 
+    adapter.print_dot(dd, "bT.dot");
 
     Permutation p = Permutation(varcount, seed, o, segments);
+
+    p.print_it();
 
     const time_point t_replace_before = now();
     dd = adapter.replace(dd, p);
     const time_point t_replace_after = now();
-    // adapter.print_dot(dd, "T.dot");
+    adapter.print_dot(dd, "T.dot");
 
     const size_t replace_time = duration_ms(t_replace_before, t_replace_after);
     total_time += replace_time;

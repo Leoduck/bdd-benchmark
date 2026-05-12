@@ -44,7 +44,7 @@ mo_of_string(std::string o){
 
 template <typename Adapter>
 typename Adapter::dd_t
-create_diamond(Adapter& adapter, int N)
+create_diamond(Adapter& adapter, int N, int scale = 1)
 {
   const auto top = adapter.build_node(true);
   const auto bot = adapter.build_node(false);
@@ -52,8 +52,8 @@ create_diamond(Adapter& adapter, int N)
   auto a = top;
 
   for (int i = N-1; 0 <= i; --i) {
-    const int a_var = 2 * i;
-    const int b_var = 2 * i + 1;
+    const int a_var = (2 * i) * scale;
+    const int b_var = (2 * i + 1) * scale;
     auto t1 = adapter.build_node(b_var, bot, a);
     auto t2 = adapter.build_node(b_var, a, bot);
     a = adapter.build_node(a_var, t2, t1);
@@ -62,19 +62,19 @@ create_diamond(Adapter& adapter, int N)
 }
 template <typename Adapter>
 typename Adapter::dd_t
-create_memo(Adapter& adapter, int N)
+create_memo(Adapter& adapter, int N, int scale = 1)
 {
   const auto bot = adapter.build_node(false);
   const auto top = adapter.build_node(true);
 
-  auto b = adapter.build_node(N*2 + 1, bot, top);
-  auto a = adapter.build_node(N*2 + 1, top, bot);
+  auto b = adapter.build_node((N*2 + 1) * scale, bot, top);
+  auto a = adapter.build_node((N*2 + 1) * scale, top, bot);
     for (int i = (N * 2-1); 0 <= i; i -= 2) {
-      auto t1 = adapter.build_node(i+1, b, top);
-      auto t2 = adapter.build_node(i+1, a, bot);
-      auto t3 = adapter.build_node(i+1, a, top);
-      a = adapter.build_node(i, t1, t2);
-      b = adapter.build_node(i, t1, t3);
+      auto t1 = adapter.build_node((i+1) * scale, b, top);
+      auto t2 = adapter.build_node((i+1) * scale, a, bot);
+      auto t3 = adapter.build_node((i+1) * scale, a, top);
+      a = adapter.build_node(i * scale, t1, t2);
+      b = adapter.build_node(i * scale, t1, t3);
     }
     b = adapter.build_node(0, b, a);
   return adapter.build();
@@ -82,7 +82,7 @@ create_memo(Adapter& adapter, int N)
 
 template <typename Adapter>
 typename Adapter::dd_t
-create_quadratic(Adapter& adapter, int N)
+create_quadratic(Adapter& adapter, int N, int scale = 1)
 {
   const auto bot = adapter.build_node(false);
   const auto top = adapter.build_node(true);
@@ -91,10 +91,10 @@ create_quadratic(Adapter& adapter, int N)
   auto b = top;
 
   for (int i = N-1; 0 <= i; --i) {
-    const int a_var = 2 * i + 1;
+    const int a_var = (2 * i + 1) * scale;
     a = adapter.build_node(a_var, bot, a);
 
-    const int b_var = 2 * i;
+    const int b_var = (2 * i) * scale;
     b = adapter.build_node(b_var, b, a);
   }
 
@@ -145,27 +145,46 @@ public:
                 break;}
             case map_opt::JUMP_DOWN :{
                 //assume only even layers present in bdd
-                for (int i = 0; i < N; i++){
-                    perm[i] = 2*i;
+                perm.resize(N*2);
+                for (int i = 0; i < N * 2; i++){
+                    perm[i] = i;
                 };
+                // New plan make maximal jump in segments
+                int segment_size = (N*2)/number_jumps;
+                std::cout << "seg_size" << segment_size << '\n';
+                for (int i = 0; i < number_jumps; i++) {
+                    int from = i * segment_size;
+                    int to = from + segment_size - 1;
+                    from = from % 2 == 0 ? from : from + 1;
+                    to = to % 2 == 0 ? to - 1 : to;
+                    perm[from] = to; 
+                }
+
                 //plan: pass amount of jumps to do
                 //then segment map into that many parts
                 //do a random jump in each
-                int segment_size = N/number_jumps;
-                for (int i = 0; i < N; i += segment_size){
-                    std::uniform_int_distribution<int> tdis(i, i+segment_size-1);
-                    int j1 = tdis(gen);
-                    int j2 = tdis(gen);
-                    int start = std::min(j1,j2);
-                    perm[start] = (j1 == start) ? j2*2+1 : j1*2+1 ;
-                }
+                // int segment_size = (N*2 - 1)/number_jumps;
+                // for (int i = 0; i < (N*2-1); i += segment_size){
+                //     std::cout << "for loop started for " << i << "\n";
+                //     std::uniform_int_distribution<int> tdis(i, i + (segment_size-1));
+                //     int j1 = tdis(gen);
+                //     int j2 = tdis(gen);
+                //     std::cout << "found j1 " << j1 << ", j2: " << j2 << "\n";
+                //     int start = std::min(j1,j2);
+                //     int to    = std::max(j1,j2);
+                //     start = start % 2 == 0 ? start : start - 1 ;
+                //     to    = to % 2    == 0 ? to + 1 : to;
+                //     std::cout << "found j1 " << start << ", j2: " << to << "\n";
+                //     perm[start] = to;
+                // }
                 break;
             }
 
             case map_opt::JUMP_UP :{
+                perm.resize(N*2);
                 //assume only even layers present in bdd
-                for (int i = 0; i < N; i++){
-                    perm[i] = 2*i;
+                for (int i = 0; i < N * 2; i++){
+                    perm[i] = i;
                 };
                 //plan: pass amount of jumps to do
                 //then segment map into that many parts
