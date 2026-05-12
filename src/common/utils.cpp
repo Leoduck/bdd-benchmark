@@ -186,17 +186,26 @@ public:
                 for (int i = 0; i < N * 2; i++){
                     perm[i] = i;
                 };
+                int segment_size = (N*2)/number_jumps;
+                std::cout << "seg_size" << segment_size << '\n';
+                for (int i = 0; i < number_jumps; i++) {
+                    int to = i * segment_size;
+                    int from = to + segment_size;
+                    from = from % 2 == 0 ? from : from - 1;
+                    to = to % 2 == 0 ? to + 1 : to;
+                    perm[from] = to; 
+                }
                 //plan: pass amount of jumps to do
                 //then segment map into that many parts
                 //do a random jump up in each
-                int segment_size = N/number_jumps;
-                for (int i = 0; i < N; i += segment_size){
-                    std::uniform_int_distribution<int> tdis(i, i+segment_size-1);
-                    int j1 = tdis(gen);
-                    int j2 = tdis(gen);
-                    int start = std::max(j1,j2);
-                    perm[start] = (j1 == start) ? j2*2+1 : j1*2+1 ;
-                }
+                // int segment_size = N/number_jumps;
+                // for (int i = 0; i < N; i += segment_size){
+                //     std::uniform_int_distribution<int> tdis(i, i+segment_size-1);
+                //     int j1 = tdis(gen);
+                //     int j2 = tdis(gen);
+                //     int start = std::max(j1,j2);
+                //     perm[start] = (j1 == start) ? j2*2+1 : j1*2+1 ;
+                // }
                 break;
             }
             case map_opt::ADJ_SWAP : {
