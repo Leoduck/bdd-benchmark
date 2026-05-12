@@ -23,6 +23,8 @@ unsigned int seed = 987654321u;
 int N = 5;
 int segments = 2;
 
+int forced_nested = false;
+
 map_opt o = map_opt::REVERSE;
 instance_opt t = instance_opt::QUADRATIC;
 
@@ -30,14 +32,15 @@ class parsing_policy
 {
 public:
   static constexpr std::string_view name = "Replace_special_case_bench";
-  static constexpr std::string_view args = "n:o:s:t:j:";
+  static constexpr std::string_view args = "n:o:s:t:j:r:";
 
   static constexpr std::string_view help_text =
   "        -n N          N for chosen instance (e.g. #pairs for quadratic) \n"
   "        -o ORDER      the order to build and apply via replace (e.g. RANDOM)\n"
   "        -s Seed       Seed for the randomness in order \n"
   "        -j segments   Number of segments to split some special cases \n"
-  "        -t bdd type   the shape of BDD to perform replace on (e.g. QUADRATIC)";
+  "        -t bdd type   the shape of BDD to perform replace on (e.g. QUADRATIC)"
+  "        -r int        1 for forcing nested sweeping algorithm ";
 
   static inline bool
   parse_input(const int c, const char* arg)
@@ -71,13 +74,16 @@ public:
       }
       return false;
     }
-
     case 't' : {
       t = inst_o_of_string(arg);
       if (t == instance_opt::ERROR){
         std::cerr << "unknown bdd type " << arg << "\n";
         return true;
       }
+      return false;
+    }
+    case 'r' : {
+      forced_nested = std::stoi(arg) == 1;
       return false;
     }
     default: return true;
@@ -135,16 +141,20 @@ int run_replace(int argc, char** argv) {
 
     std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
 
-    adapter.print_dot(dd, "bT.dot");
+    // adapter.print_dot(dd, "bT.dot");
 
     Permutation p = Permutation(varcount, seed, o, segments);
 
-    p.print_it();
+    // p.print_it();
 
     const time_point t_replace_before = now();
-    dd = adapter.replace(dd, p);
+    if (forced_nested) {
+      dd = adapter.replace_ns(dd, p);
+    } else {
+      dd = adapter.replace(dd, p);
+    }
     const time_point t_replace_after = now();
-    adapter.print_dot(dd, "T.dot");
+    // adapter.print_dot(dd, "T.dot");
 
     const size_t replace_time = duration_ms(t_replace_before, t_replace_after);
     total_time += replace_time;

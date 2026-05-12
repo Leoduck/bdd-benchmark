@@ -4,6 +4,7 @@
 #include <string_view>
 
 #include "../common/adapter.h"
+#include "adiar/types.h"
 
 #include <adiar/adiar.h>
 
@@ -215,6 +216,21 @@ public:
   inline adiar::bdd
   replace(const adiar::bdd& f, const std::function<int(int)> m) {
     return adiar::bdd_replace(f, m);
+  }
+
+  inline adiar::bdd
+  replace_ns(const adiar::bdd& f, const std::function<int(int)> m) {
+    return adiar::bdd_replace(f, m, adiar::replace_type::Non_Monotone);
+  }
+
+  inline adiar::bdd
+  replace_adj(const adiar::bdd& f, const std::function<int(int)> m) {
+    return adiar::bdd_replace(f, m, adiar::replace_type::Non_Monotone_Adj);
+  }
+
+  inline adiar::bdd
+  replace_JD(const adiar::bdd& f, const std::function<int(int)> m) {
+    return adiar::bdd_replace(f, m, adiar::replace_type::Non_Monotone_JD);
   }
 
   inline adiar::bdd
