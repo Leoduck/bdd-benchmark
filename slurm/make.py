@@ -115,6 +115,8 @@ def relnext__args(path, magnitude, dir_t):
                 ]
             },
 """
+
+
 small_instance = [2000, 20, 2000]
 mid_instance = [20000, 25, 10000]
 large_instance = [40000, 30, 30000]
@@ -122,6 +124,7 @@ names = ["quadratic", "diamond", "memo"]
 test = [small_instance, mid_instance, large_instance]
 times = [[0,0,5], [0,0,10], [0,1,0]]
 step = 5
+r = "-r 1"
 m = {}
 l = []
 for i in range(len(names)) :
@@ -130,17 +133,29 @@ for i in range(len(names)) :
     for j in range(len(test)) :
         #loop over size
         n = test[j][i] # for both 0 would be small instance of quad
-        max_jumps = n//3   # // is floor division 
-        max_swaps = n//2
+        actual_n = 0
+        if (inst == "quadratic" or inst == "diamond") :
+            actual_n = n*2
+        else :
+            actual_n = n*2 + 2
+        max_jumps = actual_n//3   # // is floor division 
+        max_swaps = actual_n//2
         for k in range(1,step+1) : # should be 1 to step
             number_jumps = max_jumps//step * k
             number_swaps = max_swaps//step * k
-            s = f"-n {n} -t {inst} -o ADJ_SWAP -j {number_swaps}"
-            jd = f"-n {n} -t {inst} -o JUMP_DOWN -j {number_jumps}"
-            ju = f"-n {n} -t {inst} -o JUMP_UP -j {number_jumps}"
+            s = f"-n {n} -t {inst} -o ADJ_SWAP -j {number_swaps} "
+            jd = f"-n {n} -t {inst} -o JUMP_DOWN -j {number_jumps} "
+            ju = f"-n {n} -t {inst} -o JUMP_UP -j {number_jumps} "
+
+            sn = f"-n {n} -t {inst} -o ADJ_SWAP -j {number_swaps} {r}"
+            jdn = f"-n {n} -t {inst} -o JUMP_DOWN -j {number_jumps} {r}"
+            jun = f"-n {n} -t {inst} -o JUMP_UP -j {number_jumps} {r}"
             l.append( [times[j], s] )
             l.append( [times[j], jd] )
             l.append( [times[j], ju] )
+            l.append( [times[j], sn] )
+            l.append( [times[j], jdn] )
+            l.append( [times[j], jun] )
 m.update({dd_t.bdd : l})
 
 
@@ -259,7 +274,7 @@ BENCHMARKS = {
 
     
     "replace": m,
-    
+
     "memo_replace": {
             dd_t.bdd: [
                 [ [ 0, 0, 30], "-n 10" ],
