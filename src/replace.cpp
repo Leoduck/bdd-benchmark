@@ -100,7 +100,7 @@ int run_replace(int argc, char** argv) {
     switch(t) {
     case instance_opt::DIAMOND: {varcount = N*2; break;}
     case instance_opt::QUADRATIC: {varcount = N*2; break;}
-    case instance_opt::MEMO: {varcount = N; break;}
+    case instance_opt::MEMO: {varcount = N * 2 + 2 ; break;}
     case instance_opt::ERROR: {return -1;}
     }
     int scale = 1;
@@ -161,7 +161,6 @@ int run_replace(int argc, char** argv) {
 
     std::cout << json::field("size (nodes)") << adapter.nodecount(dd) << json::comma
               << json::endl;
-    std::cout << json::field("satcount") << adapter.satcount(dd) << json::comma << json::endl;
     std::cout << json::field("time (ms)") << replace_time << json::endl;
 
     std::cout << json::brace_close << json::comma << json::endl;
