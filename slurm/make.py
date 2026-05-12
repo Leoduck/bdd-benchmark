@@ -117,12 +117,13 @@ def relnext__args(path, magnitude, dir_t):
 """
 
 
-small_instance = [2000, 20, 2000]
-mid_instance = [20000, 25, 10000]
-large_instance = [40000, 30, 30000]
+small_instance = [10000, 10000, 3000]
+mid_instance = [30000, 30000, 6000]
+large_instance = [50000, 50000, 10000]
 names = ["quadratic", "diamond", "memo"]
 test = [small_instance, mid_instance, large_instance]
-times = [[0,0,5], [0,0,10], [0,1,0]]
+times = [[0,0,5], [0,0,15], [0,0,20]]
+times_ns = [[0,0,20], [0,1,00], [0,2,0]]
 step = 5
 r = "-r 1"
 m = {}
@@ -153,9 +154,9 @@ for i in range(len(names)) :
             l.append( [times[j], s] )
             l.append( [times[j], jd] )
             l.append( [times[j], ju] )
-            l.append( [times[j], sn] )
-            l.append( [times[j], jdn] )
-            l.append( [times[j], jun] )
+            l.append( [times_ns[j], sn] )
+            l.append( [times_ns[j], jdn] )
+            l.append( [times_ns[j], jun] )
 m.update({dd_t.bdd : l})
 
 
