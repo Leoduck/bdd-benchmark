@@ -207,15 +207,11 @@ public:
                 break;
             }
             case map_opt::ADJ_SWAP : {
-                // pick a number of layers randomly 
-                //swap them with their lower neighbour
-                //number of swaps
-                std::uniform_int_distribution<int> dis(0, (N/2)-1);
-                int number_of_swaps = dis(gen);
-                int segment_size = N/number_of_swaps;
+                //makes number of jumps random swaps 
+                int segment_size = N/number_jumps;
+                std::cout << "seg size : " << segment_size << "\n";
                 for(int i = 0 ; i < N ; i+=segment_size){
-                    std::uniform_int_distribution<int> tdis(i, i+segment_size-2);
-                    int swap_top = tdis(gen);
+                    int swap_top = i;
                     perm[swap_top] = swap_top+1;
                     perm[swap_top+1] = swap_top;
                 }
@@ -246,7 +242,10 @@ public:
 
   void print_it(){
     std::cout << "permutation is: ";
-    for (size_t i = 0; i < perm.size(); ++i) {std::cout << i << ":" << perm[i] <<"; ";}
+    int number_mods = 0;
+    for (size_t i = 0; i < perm.size(); ++i) { if (i != perm[i]) number_mods++;}
+    std::cout << "we change " << number_mods << "layers, should be " << number_mods/2 << "swaps?\n" ;
+    //for (size_t i = 0; i < perm.size(); ++i) { if (i != perm[i]) std::cout << i << ":" << perm[i] <<"; ";}
     std::cout << '\n';
   }
   void print_it(size_t limit){
