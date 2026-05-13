@@ -1234,29 +1234,6 @@ run_picotrav(int argc, char** argv)
 
   net_t net_1 = { .nodes = nodes };
 
-  // For testing that the results are what we expect
-  // net_t net_2 = net_0;
-  // net_t net_3 = { .nodes = nodes };
-
-  // if (verify_networks) {
-  //   if (!construct_net(file_1, net_1)) return -1; // error has been printed
-  //
-  //   const bool inputs_match = net_0.inputs_w_order.size() == net_1.inputs_w_order.size();
-  //   if (!inputs_match) {
-  //     std::cerr << "Number of inputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
-  //     return -1;
-  //   }
-  //
-  //   const bool outputs_match = net_0.outputs_in_order.size() == net_1.outputs_in_order.size();
-  //   if (!outputs_match) {
-  //     std::cerr << "Number of outputs in '" << file_0 << "' and '" << file_1 << "' do not match!\n";
-  //     return -1;
-  //   }
-  //
-  //   if (match_io_names) {
-  //     if (!do_match_io_names(net_0, net_1)) { return -1; };
-  //   }
-  // }
   // Compute the variable order beforehand
   std::vector<unsigned> pv = get_new_order(var_order, net_0, net_1);
   std::vector<unsigned> pdf_level = get_new_order(variable_order::DF_LEVEL, net_0, net_1);
@@ -1304,7 +1281,7 @@ run_picotrav(int argc, char** argv)
    const time_point f_after = now();
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
-    std::cout << json::field("time (ms)") << json::value(duration_ms(f_before, f_after)) << json::endl;
+    std::cout << json::field("time (ms)") << json::value(duration_ms(f_before, f_after)) << json::comma << json::endl;
 
   size_t sum_final_sizes = 0;
   size_t max_final_size  = 0;
