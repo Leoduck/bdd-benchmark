@@ -209,7 +209,6 @@ public:
             case map_opt::ADJ_SWAP : {
                 //makes number of jumps random swaps 
                 int segment_size = N/number_jumps;
-                std::cout << "seg size : " << segment_size << "\n";
                 for(int i = 0 ; i < N ; i+=segment_size){
                     int swap_top = i;
                     perm[swap_top] = swap_top+1;
