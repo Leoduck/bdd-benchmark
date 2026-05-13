@@ -330,6 +330,23 @@ public:
     return bdd_veccompose(f, mapping);
   }
 
+  //not the prettiest but to avoid build errors for picotrav..
+  inline bdd
+  replace_ns(const bdd& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
+
+  inline bdd
+  replace_adj(const bdd& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
+
+  inline bdd
+  replace_JD(const bdd& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
+  
+
   inline bdd
   relnext(const bdd& states, const bdd& rel, const bdd& /*rel_support*/)
   {
