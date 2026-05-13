@@ -44,6 +44,21 @@ enum class variable_order
   ZIP
 };
 
+enum class approach{
+  NS = 0,
+  AS_NS = 1,
+  JD_NS = 2,
+  ERROR = 3
+};
+
+approach
+ap_of_string(std::string s){
+  if (s == "nested_sweeping" || s == "NESTED_SWEEPING" || s == "NS") {return approach::NS;}
+  if (s == "as_ns" || s == "AS_NS") {return approach::AS_NS;}
+  if (s == "jd_ns" || s == "JD_NS") {return approach::JD_NS;}
+  return approach::ERROR;
+}
+
 std::string
 to_string(const variable_order o)
 {
@@ -64,18 +79,22 @@ to_string(const variable_order o)
 }
 
 variable_order var_order = variable_order::INPUT;
+approach approach = approach::NS;
+std::string dummy_ap = "ns";
+
 bool match_io_names      = false;
 
 class parsing_policy
 {
 public:
   static constexpr std::string_view name = "Picotrav";
-  static constexpr std::string_view args = "f:o:m:";
+  static constexpr std::string_view args = "f:o:m:a:";
 
   static constexpr std::string_view help_text =
     "        -f PATH               Path to '.blif' file(s)\n"
     "        -m MATCH     [order]  Matching of circuit inputs and outputs\n"
-    "        -o ORDER     [input]  Variable order to derive from first circuit";
+    "        -o ORDER     [input]  Variable order to derive from first circuit"
+    "        -a APPROACH           (for adiar) the replacement approach used (e.g. AS_NS)";
 
   static inline bool
   parse_input(const int c, const char* arg)
@@ -138,6 +157,16 @@ public:
         std::cerr << "Undefined ordering: " << arg << "\n";
         return true;
       }
+      return false;
+    }
+
+    case 'a' : {
+      approach = ap_of_string(arg);
+      if (approach == approach::ERROR) {
+        std::cerr << "unknown approach " << arg << "\n";
+        return true;
+      }
+      dummy_ap = "test";
       return false;
     }
     default: return true;
@@ -1276,7 +1305,22 @@ run_picotrav(int argc, char** argv)
 
    const time_point f_before = now();
     for (auto& [id, bdd] : cache_0) {
-      bdd = adapter.replace(bdd, p);
+      switch (approach) {
+        case approach::ERROR :
+        case approach::NS : {
+          bdd = adapter.replace_ns(bdd, p);
+          break;
+        }
+        case approach::AS_NS : {
+          bdd = adapter.replace_adj(bdd, p);
+          break;
+        }
+        case approach::JD_NS : {
+          bdd = adapter.replace_JD(bdd, p);
+          break;
+        }
+      }
+      
     }
    const time_point f_after = now();
 
