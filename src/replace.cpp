@@ -10,6 +10,7 @@
 #include "common/adapter.h"
 #include "common/chrono.h"
 #include "common/input.h"
+#include "common/json.h"
 #include "common/libbdd_parser.h"
 
 #include "common/utils.cpp"
@@ -24,6 +25,8 @@ int N = 5;
 int segments = 2;
 
 int forced_nested = false;
+std::string dummy_order = "";
+std::string dummy_bdd = "";
 
 map_opt o = map_opt::REVERSE;
 instance_opt t = instance_opt::QUADRATIC;
@@ -72,6 +75,7 @@ public:
         std::cerr << "unknown order " << arg << "\n";
         return true;
       }
+      dummy_order = arg;
       return false;
     }
     case 't' : {
@@ -80,6 +84,7 @@ public:
         std::cerr << "unknown bdd type " << arg << "\n";
         return true;
       }
+      dummy_bdd = arg;
       return false;
     }
     case 'r' : {
@@ -90,6 +95,8 @@ public:
     }
   }
 };
+
+
 
 template <typename Adapter>
 int run_replace(int argc, char** argv) {
@@ -106,9 +113,19 @@ int run_replace(int argc, char** argv) {
     int scale = 1;
     if (o == map_opt::JUMP_DOWN || o == map_opt::JUMP_UP) scale = 2;
 
+
   // =============================================================================================
   // Initialize BDD package
   return run<Adapter>("replace", varcount, [&](Adapter& adapter) {
+
+      
+    std::cout << json::field("specs") << json::brace_open << json::endl; 
+      std::cout << json::field("n") << json::value(N) << json::comma << json::endl;
+      std::cout << json::field("bdd type") << json::value(dummy_bdd) << json::comma << json::endl;
+      std::cout << json::field("order") << json::value(dummy_order) << json::comma << json::endl;
+      std::cout << json::field("segments") << json::value(segments) << json::comma << json::endl;
+      std::cout << json::field("nested_sweeping") << json::value(forced_nested) << json::endl;
+    std::cout << json::brace_close << json::comma << json::endl << json::flush;
 
     std::cout << json::field("construction") << json::brace_open << json::endl << json::flush;
 
