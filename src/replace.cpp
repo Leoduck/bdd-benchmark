@@ -186,7 +186,7 @@ int run_replace(int argc, char** argv) {
 
     std::cout << json::field("total time (ms)") << json::value(init_time + total_time)
               << json::endl;
-    std::cout << json::brace_close << json::comma << json::endl << json::flush;
+    std::cout << json::brace_close << json::endl << json::flush;
 
     return 0;
   });

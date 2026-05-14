@@ -1,13 +1,14 @@
 # =========================================================================== #
 # User Inputs
 # =========================================================================== #
+import os
+from enum import Enum
 yes_choices = ['yes', 'y']
 no_choices = ['no', 'n']
 
 # =========================================================================== #
 # BDD Packages and their supported Diagrams.
 # =========================================================================== #
-from enum import Enum
 
 dd_t = Enum('dd_t', ['bdd', 'bcdd', 'zdd'])
 
@@ -20,16 +21,17 @@ if not dd_choice:
     print("\n  At least one kind of Decision Diagram should be included!")
     exit(1)
 
-package_t = Enum('package_t', ['adiar', 'buddy', 'cal', 'cudd', 'libbdd', 'oxidd', 'sylvan'])
+package_t = Enum('package_t', ['adiar', 'buddy',
+                 'cal', 'cudd', 'libbdd', 'oxidd', 'sylvan'])
 
 package_dd = {
-    package_t.adiar  : [dd_t.bdd, dd_t.zdd],
-    package_t.buddy  : [dd_t.bdd],
-    package_t.cal    : [dd_t.bcdd],
-    package_t.cudd   : [dd_t.bcdd, dd_t.zdd],
-    package_t.libbdd : [dd_t.bdd],
-    package_t.oxidd  : [dd_t.bdd, dd_t.bcdd, dd_t.zdd],
-    package_t.sylvan : [dd_t.bcdd]
+    package_t.adiar: [dd_t.bdd, dd_t.zdd],
+    package_t.buddy: [dd_t.bdd],
+    package_t.cal: [dd_t.bcdd],
+    package_t.cudd: [dd_t.bcdd, dd_t.zdd],
+    package_t.libbdd: [dd_t.bdd],
+    package_t.oxidd: [dd_t.bdd, dd_t.bcdd, dd_t.zdd],
+    package_t.sylvan: [dd_t.bcdd]
 }
 
 print("")
@@ -67,39 +69,50 @@ print("  ZDD: ", [p.name for p in zdd_packages])
 # =========================================================================== #
 
 # --------------------------------------------------------------------------- #
+
+
 def mcnet__args(path, merge):
-    assert(os.path.exists(f"../../{path}"))
+    assert (os.path.exists(f"../../{path}"))
     return f"-f ../{path} -a reach -a dead -a scc -o sloan{' -s async' if merge else ''}"
+
 
 # --------------------------------------------------------------------------- #
 # For the Picotrav benchmarks, we need to obtain the 'depth' and 'size'
 # optimised circuit for each of the given spec circuits.
 # --------------------------------------------------------------------------- #
-import os
 
-epfl_spec_t    = Enum('epfl_spec_t',    ['arithmetic', 'random_control'])
-epfl_opt_t     = Enum('epfl_opt_t',     ['depth', 'size'])
-picotrav_opt_t = Enum('picotrav_opt_t', ['DF', 'INPUT', 'LEVEL', 'LEVEL_DF', 'RANDOM', 'FUJITA', 'FANIN', 'FANIN_DF', 'ZIP'])
+epfl_spec_t = Enum('epfl_spec_t',    ['arithmetic', 'random_control'])
+epfl_opt_t = Enum('epfl_opt_t',     ['depth', 'size'])
+picotrav_opt_t = Enum('picotrav_opt_t', [
+                      'DF', 'INPUT', 'LEVEL', 'LEVEL_DF', 'RANDOM', 'FUJITA', 'FANIN', 'FANIN_DF', 'ZIP'])
+
 
 def picotrav__spec(spec_t, circuit_name):
     return f"../epfl/{spec_t.name}/{circuit_name}.blif"
 
+
 def picotrav__opt(opt_t, circuit_name):
     circuit_file = [f for f
-                      in os.listdir(f"../../epfl/best_results/{opt_t.name}")
-                      if f.startswith(circuit_name)][0]
+                    in os.listdir(f"../../epfl/best_results/{opt_t.name}")
+                    if f.startswith(circuit_name)][0]
     return f"../epfl/best_results/{opt_t.name}/{circuit_file}"
 
-def picotrav__args(spec_t, opt_t, circuit_name, picotrav_opt):
-    return f"-o {picotrav_opt.name} -f {picotrav__spec(spec_t, circuit_name)}" #-f {picotrav__opt(opt_t, circuit_name)}"
+
+def picotrav__args(spec_t, opt_t, circuit_name, picotrav_opt, mix_case = "NS"):
+    # -f {picotrav__opt(opt_t, circuit_name)}"
+    return f"-o {picotrav_opt.name} -f {picotrav__spec(spec_t, circuit_name)} -a {mix_case}"
 
 # --------------------------------------------------------------------------- #
+
+
 def qbf__args(circuit_name):
     # All of Irfansha Shaik's circuits seem to be output in a depth-first order.
     return f"-o df -f ../SAT2023_GDDL/QBF_instances/{circuit_name}.qcir"
 
+
 # --------------------------------------------------------------------------- #
 relprod_dir_t = Enum('relprod_dir_t', ['NEXT', 'PREV'])
+
 
 def relnext__args(path, magnitude, dir_t):
     return f"-r ../mcnet/mcc/{path}/relation.bdd -s ../mcnet/mcc/{path}/states_{magnitude}.bdd -o {dir_t.name}"
@@ -122,26 +135,26 @@ mid_instance = [30000, 30000, 6000]
 large_instance = [50000, 50000, 10000]
 names = ["quadratic", "diamond", "memo"]
 test = [small_instance, mid_instance, large_instance]
-times = [[0,0,1], [0,0,1], [0,0,1]]
-times_ns = [[0,0,10], [0,0,20], [0,1,0]]
+times = [[0, 0, 1], [0, 0, 1], [0, 0, 1]]
+times_ns = [[0, 0, 10], [0, 0, 20], [0, 1, 0]]
 step = 5
 r = "-r 1"
 m = {}
 l = []
-for i in range(len(names)) :
-    #loop over instance
+for i in range(len(names)):
+    # loop over instance
     inst = names[i]
-    for j in range(len(test)) :
-        #loop over size
-        n = test[j][i] # for both 0 would be small instance of quad
+    for j in range(len(test)):
+        # loop over size
+        n = test[j][i]  # for both 0 would be small instance of quad
         actual_n = 0
-        if (inst == "quadratic" or inst == "diamond") :
+        if (inst == "quadratic" or inst == "diamond"):
             actual_n = n*2
-        else :
+        else:
             actual_n = n*2 + 2
-        max_jumps = actual_n//3   # // is floor division 
+        max_jumps = actual_n//3   # // is floor division
         max_swaps = actual_n//2
-        for k in range(1,step+1) : # should be 1 to step
+        for k in range(1, step+1):  # should be 1 to step
             number_jumps = max_jumps//step * k
             number_swaps = max_swaps//step * k
             s = f"-n {n} -t {inst} -o ADJ_SWAP -j {number_swaps} "
@@ -151,15 +164,47 @@ for i in range(len(names)) :
             sn = f"-n {n} -t {inst} -o ADJ_SWAP -j {number_swaps} {r}"
             jdn = f"-n {n} -t {inst} -o JUMP_DOWN -j {number_jumps} {r}"
             jun = f"-n {n} -t {inst} -o JUMP_UP -j {number_jumps} {r}"
-            l.append( [times[j], s] )
-            l.append( [times[j], jd] )
-            l.append( [times[j], ju] )
-            l.append( [times_ns[j], sn] )
-            l.append( [times_ns[j], jdn] )
-            l.append( [times_ns[j], jun] )
-m.update({dd_t.bdd : l})
+            l.append([times[j], s])
+            l.append([times[j], jd])
+            l.append([times[j], ju])
+            l.append([times_ns[j], sn])
+            l.append([times_ns[j], jdn])
+            l.append([times_ns[j], jun])
+m.update({dd_t.bdd: l})
 
+# ---- picotrav job-list ----
 
+arithmetic_benchmarks = ["adder", "sin"]
+random_control_benchmarks = ["arbiter", "cavlc", "ctrl", "dec",
+                             "i2c", "int2float", "mem_ctrl", "priority", "router", "voter"]
+nested_sweeping_mixes = ["NS", "AS_NS", "JD_NS"]
+
+orderings = [
+    picotrav_opt_t.LEVEL_DF,
+    picotrav_opt_t.INPUT,
+    picotrav_opt_t.FANIN,
+    picotrav_opt_t.FUJITA,
+    picotrav_opt_t.ZIP,
+    picotrav_opt_t.RANDOM,
+]
+
+pico_replace_list = (
+    [
+        [[2, 0, 0], picotrav__args(
+            epfl_spec_t.arithmetic, epfl_opt_t.size, bench, ordering, mix)]
+        for bench in arithmetic_benchmarks
+        for ordering in orderings
+        for mix in nested_sweeping_mixes
+    ] + [
+        [[2, 0, 0], picotrav__args(
+            epfl_spec_t.random_control, epfl_opt_t.size, bench, ordering, mix)]
+        for bench in arithmetic_benchmarks
+        for ordering in orderings
+        for mix in nested_sweeping_mixes
+    ]
+)
+
+picotrav_rep_jobs = {dd_t.bdd: pico_replace_list}
 
 # --------------------------------------------------------------------------- #
 # Since we are testing BDD packages over such a wide spectrum, we have some
@@ -180,127 +225,35 @@ BENCHMARKS = {
     # ------------------------------------------------------------------------ #
 
     # ------------------------------------------------------------------------ #
-    "picotrav_replace": {
-        dd_t.bdd: [
-            # arithmetic
-            [ [ 2, 0,00], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0,00], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.INPUT) ],
-            [ [ 2, 0,00], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.FANIN) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.FUJITA) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.ZIP) ],
-            [ [ 2, 0,00], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "adder",      picotrav_opt_t.RANDOM) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "bar",        picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "bar",        picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "div",        picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "div",        picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "log2",       picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "log2",       picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "max",        picotrav_opt_t.LEVEL_DF) ],
-          # [ [ 6,12, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "max",        picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "multiplier", picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "multiplier", picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0, 1], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0, 1], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.INPUT) ],
-            [ [ 2, 0, 1], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.FANIN) ],
-            [ [ 2, 0, 1], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.FUJITA) ],
-            [ [ 2, 0, 1], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.ZIP) ],
-            [ [ 2, 0, 1], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sin",        picotrav_opt_t.RANDOM) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "sqrt",       picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "sqrt",       picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.size,  "square",     picotrav_opt_t.LEVEL_DF) ],
-          # [ [15, 0, 0], picotrav__args(epfl_spec_t.arithmetic, epfl_opt_t.depth, "square",     picotrav_opt_t.LEVEL_DF) ],
-            # random_control
-            [ [ 2, 0,1], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0,1], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.INPUT) ],
-            [ [ 2, 0,1], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.FANIN) ],
-            [ [ 2, 0,1], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.FUJITA) ],
-            [ [ 2, 0,1], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.ZIP) ],
-            [ [ 2, 0,1], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "arbiter",    picotrav_opt_t.RANDOM) ],
-            [ [ 2, 0,2], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0,2], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.INPUT) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.FANIN) ],
-            [ [ 2, 0,2], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.FUJITA) ],
-            [ [ 2, 0,2], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.ZIP) ],
-            [ [ 2, 0,2], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "cavlc",      picotrav_opt_t.RANDOM) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.LEVEL_DF) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.INPUT) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.FANIN) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.FUJITA) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.ZIP) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "ctrl",       picotrav_opt_t.RANDOM) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.LEVEL_DF) ],
-            [ [ 0, 2,0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.INPUT) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.FANIN) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.FUJITA) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.ZIP) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "dec",        picotrav_opt_t.RANDOM) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.LEVEL_DF) ],
-            [ [ 0, 2,0], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.INPUT) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.FANIN) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.FUJITA) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.ZIP) ],
-            [ [ 0, 0,20], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "i2c",        picotrav_opt_t.RANDOM) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.INPUT) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.FANIN) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.FUJITA) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.ZIP) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "int2float",  picotrav_opt_t.RANDOM) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.INPUT) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.FANIN) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.FUJITA) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.ZIP) ],
-            [ [ 2, 0,4], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "mem_ctrl",   picotrav_opt_t.RANDOM) ],
-            [ [ 2, 0,5], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.LEVEL_DF) ],
-            [ [ 2, 0,5], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.INPUT) ],
-            [ [ 2, 0,5], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.FANIN) ],
-            [ [ 2, 0,5], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.FUJITA) ],
-            [ [ 2, 0,5], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.ZIP) ],
-            [ [ 2, 0,5], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "priority",   picotrav_opt_t.RANDOM) ],
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.LEVEL_DF) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.INPUT) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.FANIN) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.FUJITA) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.ZIP) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "router",     picotrav_opt_t.RANDOM) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.LEVEL_DF) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.INPUT) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.FANIN) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.FUJITA) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.ZIP) ], 
-            [ [ 2, 0,6], picotrav__args(epfl_spec_t.random_control, epfl_opt_t.size,  "voter",      picotrav_opt_t.RANDOM) ], 
-        ], 
-    },
+    "picotrav_replace": picotrav_rep_jobs,
 
-    
     "replace": m,
 
     "memo_replace": {
-            dd_t.bdd: [
-                [ [ 0, 0, 30], "-n 10" ],
-                [ [ 0, 0, 30], "-n 100" ],
-                [ [ 0, 0, 30], "-n 500" ],
-                [ [ 0, 0, 30], "-n 1000" ],
-                [ [ 0, 0, 30], "-n 10000" ],
-                [ [ 0, 0, 30], "-n 20000" ],
-                [ [ 0, 2,  0], "-n 40000" ],
-                [ [ 0, 2,  0], "-n 60000" ],
-                ]
-            },
+        dd_t.bdd: [
+            [[0, 0, 30], "-n 10"],
+            [[0, 0, 30], "-n 100"],
+            [[0, 0, 30], "-n 500"],
+            [[0, 0, 30], "-n 1000"],
+            [[0, 0, 30], "-n 10000"],
+            [[0, 0, 30], "-n 20000"],
+            [[0, 2,  0], "-n 40000"],
+            [[0, 2,  0], "-n 60000"],
+        ]
+    },
     "diamond_replace": {
         dd_t.bdd: [
-            [ [ 0, 0, 30], "-n 10" ],
-            [ [ 0, 0, 30], "-n 20" ],
-            [ [ 0, 0, 30], "-n 30" ],
-            [ [ 0, 2,  0], "-n 32" ],
-            [ [ 0, 2,  0], "-n 34" ],
-            [ [ 1, 0,  0], "-n 36" ],
-            [ [ 1, 0,  0], "-n 38" ],
-            [ [ 1, 0,  0], "-n 40" ],
-            [ [ 1, 0,  0], "-n 42" ],
-            [ [ 1, 0,  0], "-n 44" ],
-            [ [ 3, 0, 30], "-n 50" ],
+            [[0, 0, 30], "-n 10"],
+            [[0, 0, 30], "-n 20"],
+            [[0, 0, 30], "-n 30"],
+            [[0, 2,  0], "-n 32"],
+            [[0, 2,  0], "-n 34"],
+            [[1, 0,  0], "-n 36"],
+            [[1, 0,  0], "-n 38"],
+            [[1, 0,  0], "-n 40"],
+            [[1, 0,  0], "-n 42"],
+            [[1, 0,  0], "-n 44"],
+            [[3, 0, 30], "-n 50"],
         ]
     },
     "replace_quadratic": {
@@ -308,16 +261,16 @@ BENCHMARKS = {
             # [ [ 0, 0, 20], "-n 2000" ],
             # [ [ 0, 0, 20], "-n 4000" ],
             # [ [ 0, 0, 20], "-n 5000" ],
-            [ [ 0, 2, 20], "-n 10000" ],
-            [ [ 0, 2, 20], "-n 20000" ],
-            [ [ 1, 0,  0], "-n 30000" ],
-            [ [ 1, 0,  0], "-n 40000" ],
-            [ [ 2, 0, 20], "-n 50000" ],
-            [ [ 2, 0, 20], "-n 60000" ],
-            [ [ 3, 0, 20], "-n 70000" ],
-            [ [ 4, 0, 20], "-n 80000" ],
-            ]
-        },
+            [[0, 2, 20], "-n 10000"],
+            [[0, 2, 20], "-n 20000"],
+            [[1, 0,  0], "-n 30000"],
+            [[1, 0,  0], "-n 40000"],
+            [[2, 0, 20], "-n 50000"],
+            [[2, 0, 20], "-n 60000"],
+            [[3, 0, 20], "-n 70000"],
+            [[4, 0, 20], "-n 80000"],
+        ]
+    },
     # "replace_quadratic_1": {
     #     dd_t.bdd: [
     #         [ [ 0, 0, 20], "-n 100" ],
@@ -345,9 +298,12 @@ for b in BENCHMARKS.keys():
         if input(f"Include '{b}' Benchmark? (yes/No): ").lower() in yes_choices:
             benchmark_choice.append(b)
 
-bdd_benchmarks  = [b for b in benchmark_choice if dd_t.bdd  in BENCHMARKS[b].keys()] if dd_t.bdd  in dd_choice else []
-bcdd_benchmarks = [b for b in benchmark_choice if dd_t.bcdd in BENCHMARKS[b].keys()] if dd_t.bcdd in dd_choice else []
-zdd_benchmarks  = [b for b in benchmark_choice if dd_t.zdd  in BENCHMARKS[b].keys()] if dd_t.zdd  in dd_choice else []
+bdd_benchmarks = [b for b in benchmark_choice if dd_t.bdd in BENCHMARKS[b].keys(
+)] if dd_t.bdd in dd_choice else []
+bcdd_benchmarks = [b for b in benchmark_choice if dd_t.bcdd in BENCHMARKS[b].keys(
+)] if dd_t.bcdd in dd_choice else []
+zdd_benchmarks = [b for b in benchmark_choice if dd_t.zdd in BENCHMARKS[b].keys(
+)] if dd_t.zdd in dd_choice else []
 
 print("\nBenchmarks")
 print("  BDD: ", bdd_benchmarks)
@@ -362,7 +318,7 @@ print("")
 # --------------------------------------------------------------------------- #
 
 partitions = {
-             # Mem, CPU
+    # Mem, CPU
     "q20":    [128, "ivybridge",      15],
     "q20fat": [128, "ivybridge",      15],
     "q24":    [256, "haswell",        28],
@@ -386,6 +342,7 @@ try:
 except:
     time_factor = 1.0
 
+
 def time_limit_scale(t):
     hours_to_mins = 60
     days_to_mins = 24 * hours_to_mins
@@ -399,6 +356,7 @@ def time_limit_scale(t):
         int((scaled_minutes % days_to_mins) / hours_to_mins),
         int(scaled_minutes % hours_to_mins)
     ]
+
 
 def time_limit_str(t):
     minutes = t[2]
@@ -415,22 +373,27 @@ def time_limit_str(t):
 
     return f"{days}-{hours}:{minutes}:{0}{0}"
 
+
 grouped_instances = {}
 
 for benchmark in BENCHMARKS:
-    if benchmark not in benchmark_choice: continue
+    if benchmark not in benchmark_choice:
+        continue
 
     for dd in BENCHMARKS[benchmark]:
-        if dd not in dd_choice: continue
+        if dd not in dd_choice:
+            continue
 
         instances = BENCHMARKS[benchmark][dd]
         for instance in instances:
             for p in package_t:
-                if p not in package_choice: continue
+                if p not in package_choice:
+                    continue
 
                 if dd in package_dd[p]:
                     time_key = time_limit_str(time_limit_scale(instance[0]))
-                    grouped_instances.setdefault(time_key, []).append([p, benchmark, dd, instance[1]])
+                    grouped_instances.setdefault(time_key, []).append(
+                        [p, benchmark, dd, instance[1]])
 
 print("")
 
@@ -439,20 +402,25 @@ print("")
 # executable and output file.
 # --------------------------------------------------------------------------- #
 
+
 def executable(package, benchmark, dd):
     return f"{package.name}_{benchmark}_{dd.name}"
+
 
 def benchmark_uid(package, benchmark, dd, args):
     # Remove prefixes
     args_suffix = args.replace('../', '').replace('-', '')
     # Remove parts of AEON benchmarks
-    args_suffix = args_suffix.replace('__[biomodels]', '').replace('__[cellcollective]', '').replace('__[ginsim]', '')
+    args_suffix = args_suffix.replace('__[biomodels]', '').replace(
+        '__[cellcollective]', '').replace('__[ginsim]', '')
     # Replace special characters with '_'
-    args_suffix = args_suffix.replace('.', '_').replace(' ', '_').replace('/', '_')
+    args_suffix = args_suffix.replace(
+        '.', '_').replace(' ', '_').replace('/', '_')
     # Take the last 128 characters to guarantee a limit on length of file names
     args_suffix = args_suffix[-128:]
 
     return [package.name, benchmark, dd.name, args_suffix]
+
 
 def output_path(package, benchmark, dd, args):
     b = benchmark_uid(package, benchmark, dd, args)
@@ -461,6 +429,7 @@ def output_path(package, benchmark, dd, args):
 # =========================================================================== #
 # Script Strings
 # =========================================================================== #
+
 
 MODULE_LOAD = '''module load gcc/13.2.0
 module load rust/1.77.1
@@ -471,6 +440,7 @@ ENV_SETUP = '''export CC=/comm/swstack/core/gcc/10.1.0/bin/gcc
 export CXX=/comm/swstack/core/gcc/10.1.0/bin/c++
 export LC_ALL=C'''
 
+
 def sbatch_str(jobname, time, is_exclusive):
     return f'''#SBATCH --job-name={jobname}
 #SBATCH --partition={partition}
@@ -480,7 +450,8 @@ def sbatch_str(jobname, time, is_exclusive):
 #SBATCH --cpus-per-task=1
 #SBATCH --time={time}
 #SBATCH --mail-type=END,FAIL,REQUEUE''' + ("\n#SBATCH --exclusive" if is_exclusive else "")
-#SBATCH --mail-user=202109103@post.au.dk
+# SBATCH --mail-user=202109103@post.au.dk
+
 
 def benchmark_awk_str(i):
     # $1  = output file path
@@ -494,27 +465,30 @@ def benchmark_awk_str(i):
 
     return f"{d1} {d2} {ds}"
 
+
 SLURM_ARRAY_ID = "$SLURM_ARRAY_TASK_ID"
-SLURM_JOB_ID   = "$SLURM_JOB_ID"
-SLURM_ORIGIN   = "$SLURM_SUBMIT_DIR"
+SLURM_JOB_ID = "$SLURM_JOB_ID"
+SLURM_ORIGIN = "$SLURM_SUBMIT_DIR"
+
 
 def benchmark_str(time, benchmarks):
     current_dir = os.getcwd()
-    parent_dir  = os.path.dirname(current_dir)
+    parent_dir = os.path.dirname(current_dir)
     parent_dir_name = os.path.basename(parent_dir)
 
     slurm_job_prefix = parent_dir_name
-    slurm_job_suffix = time.replace(':','-')
+    slurm_job_suffix = time.replace(':', '-')
 
     # Array file to be read with AWK
     awk_content = '\n'.join(list(map(benchmark_awk_str, benchmarks)))
-    awk_name    = slurm_job_suffix + ".awk"
+    awk_name = slurm_job_suffix + ".awk"
 
     # SLURM Shell Script
-    awk_array_idx  = f"NR == '{SLURM_ARRAY_ID}'"
+    awk_array_idx = f"NR == '{SLURM_ARRAY_ID}'"
 
-    args_length = max(map(lambda b : len(b[3].split()), benchmarks))
-    awk_args = '" "$' + '" "$'.join(map(lambda b : str(b), range(3, args_length+3)))
+    args_length = max(map(lambda b: len(b[3].split()), benchmarks))
+    awk_args = '" "$' + \
+        '" "$'.join(map(lambda b: str(b), range(3, args_length+3)))
 
     memory = partitions[partition][0]
     memory = int(memory - memory/10) * 1024
@@ -542,8 +516,10 @@ awk '{awk_array_idx} {{ system("echo -e \\"\\n=========  Clean-up `date`  ======
     # Return name and both file's content
     return [[slurm_name, slurm_content], [awk_name, awk_content]]
 
-CMAKE_STATS        = "BDD_BENCHMARK_STATS"
+
+CMAKE_STATS = "BDD_BENCHMARK_STATS"
 CMAKE_GRENDEL_FLAG = "BDD_BENCHMARK_GRENDEL"
+
 
 def build_str(stats):
     cpu = partitions[partition][1]
@@ -562,49 +538,49 @@ cmake -D CMAKE_BUILD_TYPE=Release -D CMAKE_C_FLAGS="-march={cpu}" -D CMAKE_CXX_F
 
     bdd_build = ""
     if bdd_benchmarks:
-        assert(bdd_packages)
+        assert (bdd_packages)
         bdd_build = f'''
 echo ""
 echo "Build BDD Benchmarks"
 for package in {' '.join([p.name for p in bdd_packages])} ; do
-		for benchmark in {' '.join([b for b in bdd_benchmarks])} ; do
-			mkdir -p ../out/$package ; \\
-			mkdir -p ../out/$package/$benchmark ; \\
-			mkdir -p ../out/$package/$benchmark/bdd ; \\
-			make $package'_'$benchmark'_bdd' ;
-		done ;
+                for benchmark in {' '.join([b for b in bdd_benchmarks])} ; do
+                        mkdir -p ../out/$package ; \\
+                        mkdir -p ../out/$package/$benchmark ; \\
+                        mkdir -p ../out/$package/$benchmark/bdd ; \\
+                        make $package'_'$benchmark'_bdd' ;
+                done ;
 done
 '''
 
     bcdd_build = ""
     if bcdd_benchmarks:
-        assert(bcdd_packages)
+        assert (bcdd_packages)
         bcdd_build = f'''
 echo ""
 echo "Build BCDD Benchmarks"
 for package in {' '.join([p.name for p in bcdd_packages])} ; do
-		for benchmark in {' '.join([b for b in bcdd_benchmarks])} ; do
-			mkdir -p ../out/$package ; \\
-			mkdir -p ../out/$package/$benchmark ; \\
-			mkdir -p ../out/$package/$benchmark/bcdd ; \\
-			make $package'_'$benchmark'_bcdd' ;
-		done ;
+                for benchmark in {' '.join([b for b in bcdd_benchmarks])} ; do
+                        mkdir -p ../out/$package ; \\
+                        mkdir -p ../out/$package/$benchmark ; \\
+                        mkdir -p ../out/$package/$benchmark/bcdd ; \\
+                        make $package'_'$benchmark'_bcdd' ;
+                done ;
 done
 '''
 
     zdd_build = ""
     if zdd_benchmarks:
-        assert(zdd_packages)
+        assert (zdd_packages)
         zdd_build = f'''
 echo ""
 echo "Build ZDD Benchmarks"
 for package in {' '.join([p.name for p in zdd_packages])} ; do
-		for benchmark in {' '.join([b for b in zdd_benchmarks])} ; do
-			mkdir -p ../out/$package ; \\
-			mkdir -p ../out/$package/$benchmark ; \\
-			mkdir -p ../out/$package/$benchmark/zdd ; \\
-			make $package'_'$benchmark'_zdd' ;
-		done ;
+                for benchmark in {' '.join([b for b in zdd_benchmarks])} ; do
+                        mkdir -p ../out/$package ; \\
+                        mkdir -p ../out/$package/$benchmark ; \\
+                        mkdir -p ../out/$package/$benchmark/zdd ; \\
+                        make $package'_'$benchmark'_zdd' ;
+                done ;
 done
 '''
 
@@ -618,16 +594,21 @@ echo -e "\\n========= Finished `date` ==========\\n"
 # Run Script Strings and Save to Disk
 # =========================================================================== #
 
-with open("build.sh", "w") as file:
-    file.write(build_str(input(f"Include Statistics? (yes/No): ").lower() in yes_choices))
 
-for (t,b) in grouped_instances.items():
-    for [filename, content] in benchmark_str(t,b):
+with open("build.sh", "w") as file:
+    file.write(
+        build_str(input(f"Include Statistics? (yes/No): ").lower() in yes_choices))
+
+for (t, b) in grouped_instances.items():
+    for [filename, content] in benchmark_str(t, b):
         with open(filename, "w") as file:
             file.write(content)
 
 print("\nScripts")
 print("  Time Limits:      ", len(grouped_instances.keys()))
-print("  Minimum Array:    ", min(map(lambda x : len(x[1]), grouped_instances.items())))
-print("  Maximum Array:    ", max(map(lambda x : len(x[1]), grouped_instances.items())))
-print("  Total Benchmarks: ", sum(map(lambda x : len(x[1]), grouped_instances.items())))
+print("  Minimum Array:    ", min(
+    map(lambda x: len(x[1]), grouped_instances.items())))
+print("  Maximum Array:    ", max(
+    map(lambda x: len(x[1]), grouped_instances.items())))
+print("  Total Benchmarks: ", sum(
+    map(lambda x: len(x[1]), grouped_instances.items())))

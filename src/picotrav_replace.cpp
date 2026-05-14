@@ -80,7 +80,7 @@ to_string(const variable_order o)
 
 variable_order var_order = variable_order::INPUT;
 approach approach = approach::NS;
-std::string dummy_ap = "ns";
+std::string ap_str = "ns";
 
 bool match_io_names      = false;
 
@@ -162,11 +162,11 @@ public:
 
     case 'a' : {
       approach = ap_of_string(arg);
+      ap_str = arg;
       if (approach == approach::ERROR) {
         std::cerr << "unknown approach " << arg << "\n";
         return true;
       }
-      dummy_ap = "test";
       return false;
     }
     default: return true;
@@ -1280,9 +1280,10 @@ run_picotrav(int argc, char** argv)
   const size_t varcount = net_0.inputs_w_order.size();
 
   return run<Adapter>("Picotrav replace", varcount, [&](Adapter& adapter) {
-    std::cout << json::field("Replacement to order") << json::value(to_string(var_order)) << json::comma
+    std::cout << json::field("order") << json::value(to_string(var_order)) << json::comma
               << json::endl;
-    std::cout << json::endl;
+    std::cout << json::field("nested_mix") << json::value(ap_str) << json::comma
+    << json::endl;
 
     // ============================================================================================
     // Construct BDD for first net
@@ -1323,6 +1324,8 @@ run_picotrav(int argc, char** argv)
       
     }
    const time_point f_after = now();
+   const time_duration replace_time = duration_ms(f_before, f_after);
+   total_time += replace_time;
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
     std::cout << json::field("time (ms)") << json::value(duration_ms(f_before, f_after)) << json::comma << json::endl;
