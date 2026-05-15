@@ -6,6 +6,7 @@
 #include <limits>
 #include <string>
 #include <string_view>
+#include <vector>
 
 #include "../common/adapter.h"
 
@@ -244,6 +245,32 @@ public:
     return f.UnivAbstract(cube(rbegin, rend));
   }
 
+  inline ADD
+  replace(const ADD& f, const std::function<int(int)> m){
+    std::vector<int> mapping(_varcount);
+   for (int i = 0; i < _varcount; ++i){ 
+     mapping[i] = m(i);
+   }
+   DdNode* result = Cudd_addPermute(_mgr.getManager(), f.getNode(), mapping.data());
+   Cudd_Ref(result);
+   return ADD(_mgr, result);
+  }
+
+  //not the prettiest but to avoid build errors for picotrav..
+  inline ADD
+  replace_ns(const ADD& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
+
+  inline ADD
+  replace_adj(const ADD& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
+
+  inline ADD
+  replace_JD(const ADD& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
   inline ADD
   relnext(const ADD& states, const ADD& rel, const ADD& /*rel_support*/)
   {
@@ -525,6 +552,33 @@ public:
   forall(const BDD& f, IT rbegin, IT rend)
   {
     return f.UnivAbstract(cube(rbegin, rend));
+  }
+
+  inline BDD
+  replace(const BDD& f, const std::function<int(int)> m){
+    std::vector<int> mapping(_varcount);
+   for (int i = 0; i < _varcount; ++i){ 
+     mapping[i] = m(i);
+   }
+   DdNode* result = Cudd_bddPermute(_mgr.getManager(), f.getNode(), mapping.data());
+   Cudd_Ref(result);
+   return BDD(_mgr, result);
+  }
+
+  //not the prettiest but to avoid build errors for picotrav..
+  inline BDD
+  replace_ns(const BDD& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
+
+  inline BDD
+  replace_adj(const BDD& f, const std::function<int(int)> m) {
+    return replace(f,m);
+  }
+
+  inline BDD
+  replace_JD(const BDD& f, const std::function<int(int)> m) {
+    return replace(f,m);
   }
 
   inline BDD
