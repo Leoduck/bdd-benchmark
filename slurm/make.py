@@ -198,7 +198,7 @@ pico_replace_list = (
     ] + [
         [[2, 0, 0], picotrav__args(
             epfl_spec_t.random_control, epfl_opt_t.size, bench, ordering, mix)]
-        for bench in arithmetic_benchmarks
+        for bench in random_benchmarks
         for ordering in orderings
         for mix in nested_sweeping_mixes
     ]
