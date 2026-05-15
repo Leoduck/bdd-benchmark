@@ -1,9 +1,7 @@
-
 import json
 import os
 import re
 import pandas as pd
-import plotly.graph_objects as go
 
 
 def extract_json_block(text):
@@ -36,8 +34,8 @@ def parse_filename(filename):
         return match.group(1).lower(), match.group(2).split("_")[-2] + ".blif"
     return "Unknown", filename
 
-p_adiar = r"buddy/picotrav_replace/bdd"
-p_buddy = r"buddy/picotrav_replace/bdd"
+p_adiar = r"outreppico/adiar/picotrav_replace/bdd"
+p_buddy = r"outreppico/buddy/picotrav_replace/bdd"
 
 data_list_adiar = []
 data_broken_adiar = []
@@ -54,11 +52,6 @@ for e in os.scandir(p_adiar):
                 data_broken_adiar.append({"circuit": circuit_backup,
                                           "order": order_backup, } )
                 continue
-
-def print_list(l) : 
-    for e in l:
-        print(e)
-    print()
 
 ##making cool graphs TM
 
@@ -77,7 +70,7 @@ for i in range(len(data_list_adiar)):
         "circuit": construction["path"].split("/")[-1],
         "order": benchmark["Replacement to order"],
         "time (ms)": replace["time (ms)"],
-        "total time (ms)": benchmark["total time (ms)"],
+        "total (ms)": benchmark["total time (ms)"],
         "before_max": final_diagrams_const["sizemax (nodes)"],
         "before_sum": final_diagrams_const["sizesum (nodes)"],
         "after_max": final_diagrams_rep["sizemax (nodes)"],

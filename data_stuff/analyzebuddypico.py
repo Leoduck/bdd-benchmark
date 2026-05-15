@@ -3,7 +3,6 @@ import json
 import os
 import re
 import pandas as pd
-import plotly.graph_objects as go
 
 
 def extract_json_block(text):
@@ -36,13 +35,11 @@ def parse_filename(filename):
         return match.group(1).lower(), match.group(2).split("_")[-2] + ".blif"
     return "Unknown", filename
 
-p_adiar = r"adiar/picotrav_replace/bdd"
-p_buddy = r"buddy/picotrav_replace/bdd"
+p_adiar = r"outreppico/buddy/picotrav_replace/bdd"
+p_buddy = r"outreppico/buddy/picotrav_replace/bdd"
 
 data_list_adiar = []
 data_broken_adiar = []
-data_list_buddy = []
-data_broken_buddy = []
 for e in os.scandir(p_adiar):
     if e.is_file():
         with open(e.path, "r") as f:
@@ -55,17 +52,6 @@ for e in os.scandir(p_adiar):
             except Exception as e :
                 data_broken_adiar.append({"circuit": circuit_backup,
                                           "order": order_backup, } )
-                continue
-
-for e in os.scandir(p_buddy):
-    if e.is_file():
-        with open(e.path, "r") as f:
-            text = f.read()
-            try :
-                data_block = extract_json_block(text)
-                data = json.loads(data_block)
-                data_list_buddy.append(data)
-            except Exception as e :
                 continue
 
 def print_list(l) : 
@@ -90,7 +76,7 @@ for i in range(len(data_list_adiar)):
         "circuit": construction["path"].split("/")[-1],
         "order": benchmark["Replacement to order"],
         "time (ms)": replace["time (ms)"],
-        "total (ms)": benchmark["total time (ms)"],
+        "total time (ms)": benchmark["total time (ms)"],
         "before_max": final_diagrams_const["sizemax (nodes)"],
         "before_sum": final_diagrams_const["sizesum (nodes)"],
         "after_max": final_diagrams_rep["sizemax (nodes)"],
