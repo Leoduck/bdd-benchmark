@@ -177,18 +177,20 @@ __add_benchmark(adiar adiar replace bdd)
 
 __add_benchmark(adiar adiar replace_quadratic bdd)
 __add_benchmark(buddy buddy replace_quadratic bdd)
-__add_benchmark(buddy buddy replace_quadratic_1 bdd)
 
 __add_benchmark(adiar adiar exists_quadratic bdd)
 
 __add_benchmark(adiar adiar diamond_replace bdd)
 __add_benchmark(buddy buddy diamond_replace bdd)
+__add_benchmark(cudd cudd diamond_replace bdd)
 
 __add_benchmark(adiar adiar memo_replace bdd)
 __add_benchmark(buddy buddy memo_replace bdd)
+__add_benchmark(cudd cudd memo_replace bdd)
 
 __add_benchmark(adiar adiar picotrav_replace bdd)
 __add_benchmark(buddy buddy picotrav_replace bdd)
+__add_benchmark(cudd cudd picotrav_replace bdd)
 link_bdd_extra(picotrav_replace libblifparse)
 
 add_benchmark(cnf)

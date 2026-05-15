@@ -76,7 +76,7 @@ run_quadratic(int argc, char** argv)
     const time_point f_after = now();
 
     std::cout << json::field("f") << json::brace_open << json::endl;
-    std::cout << json::field("size (nodes)") << json::value(bdd_nodecount(f)) << json::comma << json::endl;
+    std::cout << json::field("size (nodes)") << json::value(adapter.nodecount(f)) << json::comma << json::endl;
     std::cout << json::field("time (ms)") << json::value(duration_ms(f_before, f_after)) << json::endl;
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
 
@@ -89,7 +89,7 @@ run_quadratic(int argc, char** argv)
     // adapter.print_dot(f, "T.dot");
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
-    std::cout << json::field("size (nodes)") << json::value(bdd_nodecount(f)) << json::comma << json::endl;
+    std::cout << json::field("size (nodes)") << json::value(adapter.nodecount(f)) << json::comma << json::endl;
     std::cout << json::field("time (ms)") << json::value(duration_ms(g_before, g_after)) << json::endl;
     std::cout << json::brace_close << json::comma << json::endl << json::flush;
 

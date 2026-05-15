@@ -74,13 +74,13 @@ endif (BUDDY)
 #if (CAL)
 #  add_subdirectory (external/cal cal EXCLUDE_FROM_ALL)
 #endif (CAL)
-#
-## CUDD Package (Fabio Somenzi - University of Colorado Boulder, United States of America)
-#option(CUDD "Build for CUDD" ON)
-#if (CUDD)
-#  add_subdirectory(external/cudd cudd EXCLUDE_FROM_ALL)
-#endif (CUDD)
-#
+
+# CUDD Package (Fabio Somenzi - University of Colorado Boulder, United States of America)
+option(CUDD "Build for CUDD" ON)
+if (CUDD)
+ add_subdirectory(external/cudd cudd EXCLUDE_FROM_ALL)
+endif (CUDD)
+
 ## Biodivine/LibBDD (Samuel Pastva et al. - Institute of Science and Technology Austria)
 #option(LIBBDD "Build for LibBDD" ON)
 #if (LIBBDD)
