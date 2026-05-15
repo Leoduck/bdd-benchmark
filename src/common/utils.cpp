@@ -207,12 +207,15 @@ public:
                 break;
             }
             case map_opt::ADJ_SWAP : {
-                //makes number of jumps random swaps 
-                int segment_size = N/number_jumps;
-                for(int i = 0 ; i < N ; i+=segment_size){
-                    int swap_top = i;
-                    perm[swap_top] = swap_top+1;
-                    perm[swap_top+1] = swap_top;
+                //makes number of jumps swaps
+                for(int j = 0; j < number_jumps; j++) {
+                    int pos = (j * N) / number_jumps;
+
+                    // force even index
+                    pos = (pos / 2) * 2;
+                    if(pos >= N - 1)
+                        pos = N - 2;
+                    std::swap(perm[pos], perm[pos + 1]);
                 }
                 break;
             }
@@ -241,10 +244,10 @@ public:
 
   void print_it(){
     std::cout << "permutation is: ";
-    int number_mods = 0;
+    /*int number_mods = 0;
     for (size_t i = 0; i < perm.size(); ++i) { if (i != perm[i]) number_mods++;}
-    std::cout << "we change " << number_mods << "layers, should be " << number_mods/2 << "swaps?\n" ;
-    //for (size_t i = 0; i < perm.size(); ++i) { if (i != perm[i]) std::cout << i << ":" << perm[i] <<"; ";}
+    std::cout << "we change " << number_mods << "layers, should be " << number_mods/2 << "swaps?\n" ;*/
+    for (size_t i = 0; i < perm.size(); ++i) { if (i != perm[i]) std::cout << i << ":" << perm[i] <<"; ";}
     std::cout << '\n';
   }
   void print_it(size_t limit){
