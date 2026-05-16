@@ -109,9 +109,9 @@ private:
 
 public:
     //random seeded permutation
-    Permutation(int N, int seed, map_opt po, int number_jumps=0){
+    Permutation(size_t N, int seed, map_opt po, size_t number_jumps=0){
         perm.resize(N);
-        for (int i = 0; i < N; i++){
+        for (size_t i = 0; i < N; i++){
             perm[i] = i;
         };
 
@@ -126,12 +126,12 @@ public:
                 std::reverse(perm.begin(), perm.end());
                 break;}
             case map_opt::ODD_SPLIT : {
-                int n = perm.size();
+                size_t n = perm.size();
                 std::vector<unsigned> result(n);
 
-                int i = 0;
-                int evenIndex = 0;
-                int oddIndex = n / 2;
+                size_t i = 0;
+                size_t evenIndex = 0;
+                size_t oddIndex = n / 2;
 
                 for (unsigned x : perm) {
                     if (x % 2 == 0) {
@@ -146,14 +146,14 @@ public:
             case map_opt::JUMP_DOWN :{
                 //assume only even layers present in bdd
                 perm.resize(N*2);
-                for (int i = 0; i < N * 2; i++){
+                for (size_t i = 0; i < N * 2; i++){
                     perm[i] = i;
                 };
                 // New plan make maximal jump in segments
-                int segment_size = (N*2)/number_jumps;
-                for (int i = 0; i < number_jumps; i++) {
-                    int from = i * segment_size;
-                    int to = from + segment_size - 1;
+                size_t segment_size = (N*2)/number_jumps;
+                for (size_t i = 0; i < number_jumps; i++) {
+                    size_t from = i * segment_size;
+                    size_t to = from + segment_size - 1;
                     from = from % 2 == 0 ? from : from + 1;
                     to = to % 2 == 0 ? to - 1 : to;
                     perm[from] = to; 
@@ -182,13 +182,13 @@ public:
             case map_opt::JUMP_UP :{
                 perm.resize(N*2);
                 //assume only even layers present in bdd
-                for (int i = 0; i < N * 2; i++){
+                for (size_t i = 0; i < N * 2; i++){
                     perm[i] = i;
                 };
-                int segment_size = (N*2)/number_jumps;
-                for (int i = 0; i < number_jumps; i++) {
-                    int to = i * segment_size;
-                    int from = to + segment_size;
+                size_t segment_size = (N*2)/number_jumps;
+                for (size_t i = 0; i < number_jumps; i++) {
+                    size_t to = i * segment_size;
+                    size_t from = to + segment_size;
                     from = from % 2 == 0 ? from : from - 1;
                     to = to % 2 == 0 ? to + 1 : to;
                     perm[from] = to; 
@@ -208,8 +208,8 @@ public:
             }
             case map_opt::ADJ_SWAP : {
                 //makes number of jumps swaps
-                for(int j = 0; j < number_jumps; j++) {
-                    int pos = (j * N) / number_jumps;
+                for(size_t j = 0; j < number_jumps; j++) {
+                    size_t pos = (j * N) / number_jumps;
 
                     // force even index
                     pos = (pos / 2) * 2;
@@ -222,11 +222,11 @@ public:
             case map_opt::MEMO_SPEC : {
                 // Move all odd layers to the bottom
                 perm.resize(N*2+2);
-                  for (int i = 0; i < N*2+2; i++){
+                  for (size_t i = 0; i < N*2+2; i++){
                       perm[i] = i;
                   };
-                int counter = N + 1;
-                for(int i = 1 ; i < (N*2 + 2) ; i += 1){
+                size_t counter = N + 1;
+                for(size_t i = 1 ; i < (N*2 + 2) ; i += 1){
                     if (i % 2 == 0) {perm[i] = i/2;}
                     else if (i == N*2 +1) {perm[i] = ((i-1)/2) +1;} //last layer
                     else { perm[i] = i + counter--;}
