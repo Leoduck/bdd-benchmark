@@ -135,7 +135,7 @@ mid_instance = [30000, 30000, 6000]
 large_instance = [50000, 50000, 10000]
 names = ["quadratic", "diamond", "memo"]
 test = [small_instance, mid_instance, large_instance]
-times = [[0, 0, 5], [0, 0, 5], [0, 0, 5]]
+times = [[0, 0, 1], [0, 0, 1], [0, 0, 1]]
 times_ns = [[0, 0, 10], [0, 0, 20], [0, 1, 0]]
 step = 10 #more smooth graphs this way even if many more files.. 
 r = "-r 1"
@@ -198,7 +198,7 @@ pico_replace_list = (
     ] + [
         [[2, 0, 0], picotrav__args(
             epfl_spec_t.random_control, epfl_opt_t.size, bench, ordering, mix)]
-        for bench in random_benchmarks
+        for bench in random_control_benchmarks
         for ordering in orderings
         for mix in nested_sweeping_mixes
     ]
