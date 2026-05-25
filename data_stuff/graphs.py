@@ -108,7 +108,7 @@ def picotrav_scatter_normal(buddy_pico_df, adiar_pico_df) :
     cool_combo_table_no_NaNs = cool_combo_table.dropna(subset=["buddy time", "adiar time"]) #remove NaNs
     intermediate = cool_combo_table_no_NaNs.copy()
     epsilon = 1e-3
-    intermediate["buddy time"] = intermediate["buddy time"].replace(0,epsilon)  #make 0 into very small value instead
+    intermediate["buddy time"] = intermediate["buddy time"].replace(0,epsilon)  #make 0 into very small value instead (for log axis)
 
     #scatter plot!
     circuit_names = intermediate["circuit"].unique()
@@ -185,6 +185,30 @@ def picotrav_scatter_slowdown(buddy_pico_df, adiar_pico_df) :
         plt.savefig("scatter_slowdown.png")
 
 ##plots for scalable examples buddy vs adiar
+
+def time_N_plots(buddy_rep_df, adiar_rep_df):
+    #assuming a tables like [bdd N time ...] for buddy and adiar..?
+    buddy_data = buddy_rep_df.rename(columns={"time (ms)" : "buddy time"})
+    adiar_data = adiar_rep_df.rename(columns={"time (ms)" : "adiar time"})
+    combo = buddy_data.merge(adiar_data, on=["bdd", "N"])[["bdd" , "N", "buddy time", "adiar time"]].sort_values(["bdd", "N"])
+
+    #cleanup - just remove ones that are NaN?? does that make sense?
+    
+
+    bdds = combo["bdd"].unique()
+
+    #making 3 (maybe 4) plots - one for eack kind of bdd
+    fig, ax = plt.subplots(1,3)
+    for i, bdd in enumerate(bdds):
+        bdd_data = combo.loc[combo["bdd"] == bdd]
+
+        ax[i].plot(bdd_data["buddy_time"], bdd_data["N"], label="BuDDY")
+        ax[i].plot(bdd_data["adiar_time"], bdd_data["N"], label="Adiar")
+
+        ax.set_xlabel("Instance size N")
+        ax.set_ylabel("time (ms)")
+
+    plt.savefig("time_charts.png")
 ## we do have data for this right??
 
 
