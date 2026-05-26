@@ -22,6 +22,8 @@ enum class instance_opt : signed char {
     ERROR = 3
 };
 
+
+
 instance_opt
 inst_o_of_string(std::string t){
     if (t == "quadratic" || t == "QUADRATIC") {return instance_opt::QUADRATIC;}
@@ -217,14 +219,10 @@ public:
             }
             case map_opt::MEMO_SPEC : {
                 // Move all odd layers to the bottom
-                perm.resize(N*2+2);
-                  for (size_t i = 0; i < N*2+2; i++){
-                      perm[i] = i;
-                  };
-                size_t counter = N + 1;
-                for(size_t i = 1 ; i < (N*2 + 2) ; i += 1){
+                size_t counter = ((N-2)/2) + 1;
+                for(size_t i = 1 ; i < N ; i += 1){
                     if (i % 2 == 0) {perm[i] = i/2;}
-                    else if (i == N*2 +1) {perm[i] = ((i-1)/2) +1;} //last layer
+                    else if (i == N -1) {perm[i] = ((i-1)/2) +1;} //last layer
                     else { perm[i] = i + counter--;}
                 }
                 break;

@@ -107,7 +107,7 @@ int run_replace(int argc, char** argv) {
     switch(t) {
     case instance_opt::DIAMOND: {varcount = N*2; break;}
     case instance_opt::QUADRATIC: {varcount = N*2; break;}
-    case instance_opt::MEMO: {varcount = N * 2 + 2 ; break;}
+    case instance_opt::MEMO: {varcount = (N * 2) + 2 ; break;}
     case instance_opt::ERROR: {return -1;}
     }
     int scale = 1;
@@ -159,6 +159,7 @@ int run_replace(int argc, char** argv) {
     std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
 
     // adapter.print_dot(dd, "bT.dot");
+  
     Permutation p = Permutation(varcount, seed, o, segments);
     // p.print_it();
 
