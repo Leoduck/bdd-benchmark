@@ -48,12 +48,14 @@ enum class approach{
   NS = 0,
   AS_NS = 1,
   JD_NS = 2,
-  ERROR = 3
+  NORMAL = 3,
+  ERROR = 4
 };
 
 approach
 ap_of_string(std::string s){
   if (s == "nested_sweeping" || s == "NESTED_SWEEPING" || s == "NS") {return approach::NS;}
+  if (s == "normal" || s == "NORMAL" || s == "N") {return approach::NS;}
   if (s == "as_ns" || s == "AS_NS") {return approach::AS_NS;}
   if (s == "jd_ns" || s == "JD_NS") {return approach::JD_NS;}
   return approach::ERROR;
@@ -1232,6 +1234,7 @@ do_match_io_names(net_t& net_0, net_t& net_1)
 
 
 std::vector<unsigned>
+
 make_order_to_org_variables(net_t net, std::vector<unsigned> order){
   std::vector<unsigned> remapped = order;
   for (auto kv : net.inputs_w_order) {
@@ -1302,33 +1305,43 @@ run_picotrav(int argc, char** argv)
     std::cout << json::endl;
     std::cout << json::array_close << json::comma << json::endl << json::flush;
 
-   Permutation p = Permutation(make_order_to_org_variables(net_0, pv));
+    auto new_map = make_order_to_org_variables(net_0, pv);
+    //calculating wether we're just applying identity map - if so ignore?
+    bool they_equal = true;
+    for(size_t i = 0 ; i < new_map.size(); i++){
+      they_equal &= (new_map[i] == i);
+    }
 
-   const time_point f_before = now();
-    for (auto& [id, bdd] : cache_0) {
-      switch (approach) {
-        case approach::ERROR :
-        case approach::NS : {
-          bdd = adapter.replace_ns(bdd, p);
-          break;
-        }
-        case approach::AS_NS : {
-          bdd = adapter.replace_adj(bdd, p);
-          break;
-        }
-        case approach::JD_NS : {
-          bdd = adapter.replace_JD(bdd, p);
-          break;
+    Permutation p = Permutation(new_map);
+    const time_point f_before = now();
+      for (auto& [id, bdd] : cache_0) {
+        switch (approach) {
+          case approach::ERROR :
+          case approach::NS : {
+            bdd = adapter.replace_ns(bdd, p);
+            break;
+          }
+          case approach::AS_NS : {
+            bdd = adapter.replace_adj(bdd, p);
+            break;
+          }
+          case approach::JD_NS : {
+            bdd = adapter.replace_JD(bdd, p);
+            break;
+          }
+          case approach::NORMAL : {
+            bdd = adapter.replacce(bdd,p);
+            break;
+          }
         }
       }
-      
-    }
    const time_point f_after = now();
    const time_duration replace_time = duration_ms(f_before, f_after);
    total_time += replace_time;
 
     std::cout << json::field("bdd_replace(f)") << json::brace_open << json::endl;
     std::cout << json::field("time (ms)") << json::value(duration_ms(f_before, f_after)) << json::comma << json::endl;
+    std::cout << json::field("identity reorder") << json::value(they_equal) << json::comma << json::endl;
 
   size_t sum_final_sizes = 0;
   size_t max_final_size  = 0;
