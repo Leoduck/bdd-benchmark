@@ -39,6 +39,7 @@ mo_of_string(std::string o){
   if (o == "jump_up" || o == "JUMP_UP") {return map_opt::JUMP_UP;}
   if (o == "odd_split" || o == "ODD_SPLIT") {return map_opt::ODD_SPLIT;}
   if (o == "memo_spec" || o == "MEMO_SPEC") {return map_opt::MEMO_SPEC;}
+  if (o == "diamond" || o == "odd_split" || "ODD_SPLIT") {return map_opt::ODD_SPLIT;}
   return map_opt::ERROR; // invalid! 
 } 
 
@@ -101,6 +102,19 @@ create_quadratic(Adapter& adapter, int N, int scale = 1)
   return adapter.build();
 }
 
+template <typename Adapter>
+typename Adapter::dd_t
+create_double_diamond(Adapter& adapter, int N){
+    //make diamond, 
+    //start instance 
+        //group the first n/2 even and odd vars together at the top
+        //group the remaining n/2 even and odd vars together at the bottom
+    // replace to:
+        //swap order of the diamonds
+
+    return adapter.build();
+}
+
 
 class Permutation {
 private: 
@@ -158,24 +172,6 @@ public:
                     to = to % 2 == 0 ? to - 1 : to;
                     perm[from] = to; 
                 }
-
-                //plan: pass amount of jumps to do
-                //then segment map into that many parts
-                //do a random jump in each
-                // int segment_size = (N*2 - 1)/number_jumps;
-                // for (int i = 0; i < (N*2-1); i += segment_size){
-                //     std::cout << "for loop started for " << i << "\n";
-                //     std::uniform_int_distribution<int> tdis(i, i + (segment_size-1));
-                //     int j1 = tdis(gen);
-                //     int j2 = tdis(gen);
-                //     std::cout << "found j1 " << j1 << ", j2: " << j2 << "\n";
-                //     int start = std::min(j1,j2);
-                //     int to    = std::max(j1,j2);
-                //     start = start % 2 == 0 ? start : start - 1 ;
-                //     to    = to % 2    == 0 ? to + 1 : to;
-                //     std::cout << "found j1 " << start << ", j2: " << to << "\n";
-                //     perm[start] = to;
-                // }
                 break;
             }
 
