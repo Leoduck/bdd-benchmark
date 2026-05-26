@@ -28,7 +28,7 @@ package_dd = {
     package_t.adiar: [dd_t.bdd, dd_t.zdd],
     package_t.buddy: [dd_t.bdd],
     package_t.cal: [dd_t.bcdd],
-    package_t.cudd: [dd_t.bcdd, dd_t.zdd],
+    package_t.cudd: [dd_t.bdd, dd_t.bcdd, dd_t.zdd],
     package_t.libbdd: [dd_t.bdd],
     package_t.oxidd: [dd_t.bdd, dd_t.bcdd, dd_t.zdd],
     package_t.sylvan: [dd_t.bcdd]
@@ -206,6 +206,28 @@ pico_replace_list = (
 
 picotrav_rep_jobs = {dd_t.bdd: pico_replace_list}
 
+
+
+quad_Ns = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
+quad_time = [0,1,0]
+memo_Ns = [3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000]
+memo_time = [0,1,0]
+diamond_Ns = [5, 10, 15, 20, 25, 30, 35, 40]
+diamond_times = [[0,0,30], [0,0,30],[0,0,30],[0,0,30],[0,0,30],[0,0,30], [0,3,0], [0,3,0]]
+
+scalable_jobs_quad = []
+for e in quad_Ns :
+    scalable_jobs_quad.append([quad_time, f"-n {e} -o REVERSE -t quadratic -r 1"])
+
+scalable_jobs_memo = []
+for e in memo_Ns :
+    scalable_jobs_quad.append([memo_time, f"-n {e} -o MEMO_SPEC -t memo -r 1"])
+
+scalable_jobs_diamond = []
+for i in range(len(diamond_Ns)) :
+    scalable_jobs_quad.append([diamond_times[i], f"-n {diamond_Ns[i]} -o ODD_SPLIT -t diamond -r 1"])
+
+
 # --------------------------------------------------------------------------- #
 # Since we are testing BDD packages over such a wide spectrum, we have some
 # instances that require several days of computaiton time (closing into the 15
@@ -229,60 +251,8 @@ BENCHMARKS = {
 
     "replace": m,
 
-    "memo_replace": {
-        dd_t.bdd: [
-            [[0, 0, 30], "-n 10"],
-            [[0, 0, 30], "-n 100"],
-            [[0, 0, 30], "-n 500"],
-            [[0, 0, 30], "-n 1000"],
-            [[0, 0, 30], "-n 10000"],
-            [[0, 0, 30], "-n 20000"],
-            [[0, 2,  0], "-n 40000"],
-            [[0, 2,  0], "-n 60000"],
-        ]
-    },
-    "diamond_replace": {
-        dd_t.bdd: [
-            [[0, 0, 30], "-n 10"],
-            [[0, 0, 30], "-n 20"],
-            [[0, 0, 30], "-n 30"],
-            [[0, 2,  0], "-n 32"],
-            [[0, 2,  0], "-n 34"],
-            [[1, 0,  0], "-n 36"],
-            [[1, 0,  0], "-n 38"],
-            [[1, 0,  0], "-n 40"],
-            [[1, 0,  0], "-n 42"],
-            [[1, 0,  0], "-n 44"],
-            [[3, 0, 30], "-n 50"],
-        ]
-    },
-    "replace_quadratic": {
-        dd_t.bdd: [
-            # [ [ 0, 0, 20], "-n 2000" ],
-            # [ [ 0, 0, 20], "-n 4000" ],
-            # [ [ 0, 0, 20], "-n 5000" ],
-            [[0, 2, 20], "-n 10000"],
-            [[0, 2, 20], "-n 20000"],
-            [[1, 0,  0], "-n 30000"],
-            [[1, 0,  0], "-n 40000"],
-            [[2, 0, 20], "-n 50000"],
-            [[2, 0, 20], "-n 60000"],
-            [[3, 0, 20], "-n 70000"],
-            [[4, 0, 20], "-n 80000"],
-        ]
-    },
-    # "replace_quadratic_1": {
-    #     dd_t.bdd: [
-    #         [ [ 0, 0, 20], "-n 100" ],
-    #         [ [ 0, 0, 20], "-n 500" ],
-    #         [ [ 0, 0, 20], "-n 1000" ],
-    #         [ [ 0, 0, 20], "-n 1500" ],
-    #         [ [ 0, 0, 20], "-n 2000" ],
-    #         [ [ 0, 0, 20], "-n 3000" ],
-    #         [ [ 0, 0, 20], "-n 4000" ],
-    #         [ [ 0, 0, 20], "-n 5000" ],
-    #     ]
-    # },
+    "replace_scalable": { dd_t.bdd: scalable_jobs_memo + scalable_jobs_diamond + scalable_jobs_quad},
+
 }
 
 # Copy BDD timings to BCDD timiings
