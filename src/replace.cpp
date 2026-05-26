@@ -137,10 +137,10 @@ int run_replace(int argc, char** argv) {
     size_t total_time = 0;
     const time_point t1 = now();
     switch(t) {
-    case instance_opt::DIAMOND: {dd = create_diamond(adapter, N, scale);  break;}
-    case instance_opt::QUADRATIC: {dd = create_quadratic(adapter, N, scale); break;}
-    case instance_opt::MEMO: {dd = create_memo(adapter, N, scale); break;}
-    case instance_opt::ERROR: {return -1;}
+      case instance_opt::DIAMOND: {dd = create_diamond(adapter, N, scale);  break;}
+      case instance_opt::QUADRATIC: {dd = create_quadratic(adapter, N, scale); break;}
+      case instance_opt::MEMO: {dd = create_memo(adapter, N, scale); break;}
+      case instance_opt::ERROR: {return -1;}
     }
     const time_point t2 = now();
 
@@ -154,14 +154,12 @@ int run_replace(int argc, char** argv) {
 
 
     // ========================================================================
-    // Do some replacing in the queens instance
+    // Performing replace in given instance
 
     std::cout << json::field("replace") << json::brace_open << json::endl << json::flush;
 
     // adapter.print_dot(dd, "bT.dot");
-
     Permutation p = Permutation(varcount, seed, o, segments);
-
     // p.print_it();
 
     const time_point t_replace_before = now();
