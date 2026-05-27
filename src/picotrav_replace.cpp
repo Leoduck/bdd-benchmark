@@ -1330,7 +1330,7 @@ run_picotrav(int argc, char** argv)
             break;
           }
           case approach::NORMAL : {
-            bdd = adapter.replacce(bdd,p);
+            bdd = adapter.replace(bdd,p);
             break;
           }
         }
