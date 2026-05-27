@@ -136,7 +136,7 @@ large_instance = [50000, 50000, 10000]
 names = ["quadratic", "diamond", "memo"]
 test = [small_instance, mid_instance, large_instance]
 times = [[0, 0, 1], [0, 0, 1], [0, 0, 1]]
-times_ns = [[0, 0, 10], [0, 0, 20], [0, 1, 0]]
+times_ns = [[0, 0, 20], [0, 0, 40], [0, 2, 0]]
 step = 10 #more smooth graphs this way even if many more files.. 
 r = "-r 1"
 m = {}
@@ -177,7 +177,7 @@ m.update({dd_t.bdd: l})
 arithmetic_benchmarks = ["adder", "sin"]
 random_control_benchmarks = ["arbiter", "cavlc", "ctrl", "dec",
                              "i2c", "int2float", "mem_ctrl", "priority", "router", "voter"]
-nested_sweeping_mixes = ["NS", "AS_NS", "JD_NS"]
+nested_sweeping_mixes = ["NORMAL"]
 
 orderings = [
     picotrav_opt_t.LEVEL_DF,
@@ -208,12 +208,12 @@ picotrav_rep_jobs = {dd_t.bdd: pico_replace_list}
 
 
 
-quad_Ns = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000]
-quad_time = [0,1,0]
+quad_Ns = [5000, 10000, 15000, 20000, 25000, 30000, 35000, 40000, 45000, 50000, 55000, 60000, 65000, 70000, 75000, 80000]
+quad_time = [0,2,0]
 memo_Ns = [3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000]
-memo_time = [0,1,0]
+memo_time = [0,3,0]
 diamond_Ns = [5, 10, 15, 20, 25, 30, 35, 40]
-diamond_times = [[0,0,30], [0,0,30],[0,0,30],[0,0,30],[0,0,30],[0,0,30], [0,3,0], [0,3,0]]
+diamond_times = [[0,1,0], [0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0], [0,5,0], [0,5,0]]
 
 scalable_jobs_quad = []
 for e in quad_Ns :
