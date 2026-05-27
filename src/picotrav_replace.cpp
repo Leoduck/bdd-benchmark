@@ -55,7 +55,7 @@ enum class approach{
 approach
 ap_of_string(std::string s){
   if (s == "nested_sweeping" || s == "NESTED_SWEEPING" || s == "NS") {return approach::NS;}
-  if (s == "normal" || s == "NORMAL" || s == "N") {return approach::NS;}
+  if (s == "normal" || s == "NORMAL" || s == "N") {return approach::NORMAL;}
   if (s == "as_ns" || s == "AS_NS") {return approach::AS_NS;}
   if (s == "jd_ns" || s == "JD_NS") {return approach::JD_NS;}
   return approach::ERROR;
