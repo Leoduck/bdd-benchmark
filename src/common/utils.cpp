@@ -264,7 +264,7 @@ create_diamond2(Adapter& adapter, int N, int scale = 1)
         Permutation p = Permutation(N*2, 0, map_opt::ODD_SPLIT);
         return adapter.replace(create_diamond(adapter, N), p); 
     };
-    auto map = [&](int x) -> int {return x + (N * 2 + 1);};
+    auto map = [&](int x) -> int {return x + (N * 2);};
     auto dia_1 = shaped_diamond();
     auto dia_2 = shaped_diamond();
     dia_2 = adapter.replace(dia_2, map);
