@@ -256,6 +256,21 @@ public:
     }
 };
 
+template <typename Adapter>
+typename Adapter::dd_t
+create_diamond2(Adapter& adapter, int N, int scale = 1)
+{
+    auto shaped_diamond = [&]() {
+        Permutation p = Permutation(N*2, 0, map_opt::ODD_SPLIT);
+        return adapter.replace(create_diamond(adapter, N), p); 
+    };
+    auto map = [&](int x) -> int {return x + (N * 2 + 1);};
+    auto dia_1 = shaped_diamond();
+    auto dia_2 = shaped_diamond();
+    dia_2 = adapter.replace(dia_2, map);
+    typename Adapter::dd_t res = adapter.apply_and(dia_1,dia_2);
+    return res;
+}
 
 // For testing the permutations...
  // int main(int argc, char **argv){
