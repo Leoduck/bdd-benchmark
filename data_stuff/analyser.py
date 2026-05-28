@@ -37,8 +37,11 @@ def parse_filename(filename: str , benchmark):
         # Matches everything between o_ and _f_ as 'order'
         # Matches everything after _f_ and before .out as 'circuit'
         match = re.search(r"n_(.+)_t_(.+)_o_(.+)_j_(.+)\.out", filename)
+        match2 = re.search(r"n_(.+)_o_(.+)_t_(.+)_r_(.+)\.out", filename)
         if match:
             return match.group(1), match.group(2), match.group(3), match.group(4), 1
+        elif match2:
+            return match2.group(1), match2.group(3), match2.group(2), "Unknown",  match2.group(4) 
         return "unknown", filename, "Unknown", "Unknown", "Unknown"
     if (benchmark == Benchmark.PICO) :
         """
@@ -149,5 +152,3 @@ def extract_rep_pico(data_list, extra_data) :
             }
         )
     return rows + extra_data
-
-

@@ -6,6 +6,12 @@ import pandas as pd
 import analyser
 import sys
 
+#fancy style stuff TM
+colors = ["#F5F600", "#C9F400", "#00E33A", "#00D154","#00B06D","#00857B","#00697D","#24517D","#2E3F7C","#3C1678","#440068","#3E0046"]
+adiar_color = "#1F1F14"
+buddy_color = "#F60000"
+cudd_color = "#1000F6"
+plt.rc('font',family='TeX Gyre Schola')
 
 def group_ns_sp_times_per_jump_amount(instance, order) :
     #should group for each amount of jumps made in instance x with order , the ns times and special case times
@@ -45,7 +51,7 @@ def special_case_plots(special_cases_df) :
     fig, axs = plt.subplots(3,3)
     
     orders = ["ADJ_SWAP", "JUMP_DOWN", "JUMP_UP"]
-    colors = ["blue", "green", "red"]
+    sub_colors = ["#00D8F5", "#3D59F3", "#FF8000"]
     bdds = ["quadratic", "diamond", "memo"]
     sizes = [[10000, 30000, 50000],[10000, 30000, 50000], [3000, 6000, 10000] ]
 
@@ -54,7 +60,7 @@ def special_case_plots(special_cases_df) :
             results = special_cases_df.loc[special_cases_df["bdd"] == bdds[b]].loc[special_cases_df["n"] == sizes[b][s]]
             for o in range(len(orders)):
                 jumps, yax = group_ns_sp_times_per_jump_amount(results, orders[o])
-                axs[b][s].plot(jumps, yax, color=colors[o], label=orders[o])
+                axs[b][s].plot(jumps, yax, color=sub_colors[o], label=orders[o])
     
     #making pretty:
     #layout
@@ -84,20 +90,21 @@ def special_case_plots(special_cases_df) :
         ymax = ymax + 500 if i == 2 else ymax
 
         for ax in row_axes:
-            ax.set_ylim(0, ymax)
-            ax.set_yticks([0, ymax/2, ymax])
+            ax.set_yscale("log")
+            ax.set_ylim(10, 100000)
+            ax.set_yticks([10,100,1000,10000,100000])
+            
 
     #axis titles
-    fig.supxlabel("fraction of total jumps")
-    fig.supylabel("speed-up with special cases")
-    fig.suptitle("Special case running times")
+    fig.supxlabel("Fraction of possible jumps")
+    fig.supylabel("Speed-up with special cases")
     fig.tight_layout()
 
     #legend
     handles, labels = axs[0, 0].get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", bbox_to_anchor=(0.55, 0.06), ncol=3)
     fig.subplots_adjust(bottom=0.20)
-    plt.savefig('test.png')
+    plt.savefig('special.png')
 
 
 def picotrav_scatter_normal(buddy_pico_df, adiar_pico_df) :
@@ -112,7 +119,6 @@ def picotrav_scatter_normal(buddy_pico_df, adiar_pico_df) :
 
     #scatter plot!
     circuit_names = intermediate["circuit"].unique()
-    colors = plt.cm.tab20.colors
     fig, ax = plt.subplots()
 
     for i, circuit in enumerate(circuit_names):
@@ -159,7 +165,6 @@ def picotrav_scatter_slowdown(buddy_pico_df, adiar_pico_df) :
 
     #scatter plot!
     circuit_names = intermediate["circuit"].unique()
-    colors = plt.cm.tab20.colors
     fig, ax = plt.subplots()
 
     for i, circuit in enumerate(circuit_names):
@@ -186,60 +191,118 @@ def picotrav_scatter_slowdown(buddy_pico_df, adiar_pico_df) :
 
 ##plots for scalable examples buddy vs adiar
 
+def time_N_plots2(adiar_rep_df, buddy_rep_df, cudd_rep_df, bdd, size_pair) :
+    adiar_data = adiar_rep_df.loc[adiar_rep_df["bdd"] == bdd].rename(columns={"time (ms)" : "adiar time"}).dropna(subset=["adiar time"]).sort_values(["bdd", "n"])
+    buddy_data = buddy_rep_df.loc[buddy_rep_df["bdd"] == bdd].rename(columns={"time (ms)" : "buddy time"}).dropna(subset=["buddy time"]).sort_values(["bdd", "n"])
+    cudd_data = cudd_rep_df.loc[cudd_rep_df["bdd"] == bdd].rename(columns={"time (ms)" : "cudd time"}).dropna(subset=["cudd time"]).sort_values(["bdd", "n"])
+    fig, ax = plt.subplots()
+
+    ax.plot(adiar_data["n"], adiar_data["adiar time"].replace(0,1e-3), label="Adiar", marker='o', color=adiar_color)
+    ax.plot(buddy_data["n"], buddy_data["buddy time"].replace(0,1e-3), label="BuDDy", marker='^', color=buddy_color)
+    ax.plot(cudd_data["n"], cudd_data["cudd time"].replace(0,1e-3), label="CuDD", marker='s', color=cudd_color)
+
+    plt.annotate(f"{adiar_data["af_size"].tolist()[-1]/24/size_pair[0]} {size_pair[1]}",(adiar_data["n"].tolist()[-1], adiar_data["adiar time"].tolist()[-1]),textcoords="offset points",xytext=(0,10),ha='center', color=adiar_color)
+    #plt.annotate("test",(buddy_data["n"].tolist()[-1], buddy_data["buddy time"].tolist()[-1]),textcoords="offset points",xytext=(0,10),ha='center', color=buddy_color)
+    plt.annotate(f"{cudd_data["af_size"].tolist()[-1]/32/size_pair[0]} {size_pair[1]}",(cudd_data["n"].tolist()[-1], cudd_data["cudd time"].tolist()[-1]),textcoords="offset points",xytext=(0,-10),ha='center', color=cudd_color)
+    
+    ax.set_xlabel("Instance size N")
+    ax.set_yscale("log")
+    ax.set_ylabel("time (ms)")
+
+    plt.grid()
+    plt.legend()
+    plt.savefig(f"time_chart_{bdd}.png")
+
+
 def time_N_plots(buddy_rep_df, adiar_rep_df):
     #assuming a tables like [bdd N time ...] for buddy and adiar..?
-    buddy_data = buddy_rep_df.rename(columns={"time (ms)" : "buddy time"})
-    adiar_data = adiar_rep_df.rename(columns={"time (ms)" : "adiar time"})
-    combo = buddy_data.merge(adiar_data, on=["bdd", "N"])[["bdd" , "N", "buddy time", "adiar time"]].sort_values(["bdd", "N"])
+    buddy_data = buddy_rep_df.rename(columns={"time (ms)" : "buddy time"}).sort_values(["bdd", "n"]) 
+    adiar_data = adiar_rep_df.rename(columns={"time (ms)" : "adiar time"}).sort_values(["bdd", "n"])
 
-    #cleanup - just remove ones that are NaN?? does that make sense?
-    
-
-    bdds = combo["bdd"].unique()
+    print(adiar_data)
+    print("\n\n\n")
+    print(buddy_data)
+    bdds = adiar_data["bdd"].unique()
+    print(bdds)
 
     #making 3 (maybe 4) plots - one for eack kind of bdd
-    fig, ax = plt.subplots(1,3)
+    fig, ax = plt.subplots(3,1)
     for i, bdd in enumerate(bdds):
-        bdd_data = combo.loc[combo["bdd"] == bdd]
+        #getting bdd specific data, cleaning up NaNs
+        adiar_bdd_data = adiar_data.loc[adiar_data["bdd"] == bdd].dropna(subset=["adiar time"])
+        buddy_bdd_data = buddy_data.loc[buddy_data["bdd"] == bdd].dropna(subset=["buddy time"])
+        
+        ax[i].plot(buddy_bdd_data["n"], buddy_bdd_data["buddy time"], label="BuDDy", marker='o')
+        ax[i].plot(adiar_bdd_data["n"], adiar_bdd_data["adiar time"], label="Adiar", marker='o')
 
-        ax[i].plot(bdd_data["buddy_time"], bdd_data["N"], label="BuDDY")
-        ax[i].plot(bdd_data["adiar_time"], bdd_data["N"], label="Adiar")
-
-        ax.set_xlabel("Instance size N")
-        ax.set_ylabel("time (ms)")
-
+        ax[i].set_xlabel("Instance size N")
+        ax[i].set_yscale("log")
+        ax[i].set_ylabel("time (ms)")
+        #ax[i].yaxis.get_major_formatter().set_scientific(False)
+    plt.legend()
     plt.savefig("time_charts.png")
-## we do have data for this right??
 
+#buddy compose vs replace
+def buddy_comp() :
+    ns = [i*250 for i in range(1,13)]
+    rep_times = [102, 737, 2395, 5939, 11251, 20475, 33529, 51757, 75718, 107554, 148859, 200196]
+    compose_times = [11, 67, 133, 259, 263, 509, 513, 655, 964, 1240, 1609, 1829]
+    fig, ax = plt.subplots()
+    ax.plot(ns, rep_times, linestyle='-', marker='o', label="bdd_replace", color="#00D8F5")
+    ax.plot(ns, compose_times, linestyle='-', marker='o', label="bdd_compose", color="#3D59F3")
+    ax.set_xlabel("Instance size N")
+    ax.set_ylabel("time (ms)")
+    #ax.set_yscale("log")
+    #ax.set_xscale("log")
+    plt.legend()
+    plt.grid()
+    plt.savefig("buddy_comp.png")
 
 def main() :
     #expect - given path for buddy and adiar
     args = sys.argv[1:]
     buddy_path = args[0] 
     adiar_path = args[1] 
+    cudd_path = args[2]
 
     special_path = f"{adiar_path}/replace/bdd"
     adiar_pico_path = f"{adiar_path}/picotrav_replace/bdd"
     buddy_pico_path = f"{buddy_path}/picotrav_replace/bdd"
+    adiar_scale_path = f"{adiar_path}/replace_scalable/bdd"
+    buddy_scale_path = f"{buddy_path}/replace_scalable/bdd"
+    cudd_scale_path = f"{cudd_path}/replace_scalable/bdd"
 
     #read data
     special_data , special_broken = analyser.read_all_data(special_path, analyser.Benchmark.SPECIAL)
-    adiar_pico_data , adiar_pico_broken = analyser.read_all_data(adiar_pico_path, analyser.Benchmark.PICO)
-    buddy_pico_data , buddy_pico_broken = analyser.read_all_data(buddy_pico_path, analyser.Benchmark.PICO)
+    """adiar_pico_data , adiar_pico_broken = analyser.read_all_data(adiar_pico_path, analyser.Benchmark.PICO)
+    buddy_pico_data , buddy_pico_broken = analyser.read_all_data(buddy_pico_path, analyser.Benchmark.PICO)"""
+    buddy_scale_data, buddy_scale_broken = analyser.read_all_data(buddy_scale_path, analyser.Benchmark.SPECIAL)
+    adiar_scale_data, adiar_scale_broken = analyser.read_all_data(adiar_scale_path, analyser.Benchmark.SPECIAL)
+    cudd_scale_data, cudd_scale_broken = analyser.read_all_data(cudd_scale_path, analyser.Benchmark.SPECIAL)
 
     #build data frames..
     special_rows = analyser.extract_rep_special(special_data, special_broken)
-    adiar_pico_rows = analyser.extract_rep_pico(adiar_pico_data, adiar_pico_broken)
-    buddy_pico_rows = analyser.extract_rep_pico(buddy_pico_data, buddy_pico_broken)
+    """adiar_pico_rows = analyser.extract_rep_pico(adiar_pico_data, adiar_pico_broken)
+    buddy_pico_rows = analyser.extract_rep_pico(buddy_pico_data, buddy_pico_broken)"""
+    buddy_scale_rows = analyser.extract_rep_special(buddy_scale_data, buddy_scale_broken)
+    adiar_scale_rows = analyser.extract_rep_special(adiar_scale_data, adiar_scale_broken)
+    cudd_scale_rows = analyser.extract_rep_special(cudd_scale_data, cudd_scale_broken)
 
     special_df = pd.DataFrame(special_rows ).sort_values(by=["bdd", "order", "n", "ns", "jumps"])
-    adiar_pico_df = pd.DataFrame(adiar_pico_rows).sort_values(by=["approach", "circuit", "order"])
-    buddy_pico_df = pd.DataFrame(buddy_pico_rows).sort_values(by=["approach", "circuit", "order"])
+    """adiar_pico_df = pd.DataFrame(adiar_pico_rows).sort_values(by=["approach", "circuit", "order"])
+    buddy_pico_df = pd.DataFrame(buddy_pico_rows).sort_values(by=["approach", "circuit", "order"])"""
+    adiar_scalable_df = pd.DataFrame(adiar_scale_rows)
+    buddy_scalable_df = pd.DataFrame(buddy_scale_rows)
+    cudd_scalable_df = pd.DataFrame(cudd_scale_rows)
 
     #drawing graphs
     special_case_plots(special_df)
-    picotrav_scatter_normal(buddy_pico_df , adiar_pico_df)
-    picotrav_scatter_slowdown(buddy_pico_df , adiar_pico_df)
+    """picotrav_scatter_normal(buddy_pico_df , adiar_pico_df)
+    picotrav_scatter_slowdown(buddy_pico_df , adiar_pico_df)"""
+    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "quadratic", [1024, "KiB"])
+    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "diamond", [1048576, "MiB"])
+    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "memo", [1024, "KiB"])
+    buddy_comp()
 
 if __name__ == "__main__":
     main()
