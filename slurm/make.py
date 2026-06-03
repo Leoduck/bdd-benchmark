@@ -214,6 +214,9 @@ memo_Ns = [3000, 6000, 9000, 12000, 15000, 18000, 21000, 24000, 27000, 30000]
 memo_time = [0,3,0]
 diamond_Ns = [5, 10, 15, 20, 25, 30, 35, 40]
 diamond_times = [[0,1,0], [0,1,0],[0,1,0],[0,1,0],[0,1,0],[0,1,0], [0,5,0], [0,5,0]]
+diamondf_Ns = [5, 10, 15, 20, 25, 30, 29, 31]
+diamondf_times = [[0,8,0], [0,8,0],[0,8,0],[0,8,0],[0,8,0],[0,8,0], [0,8,0], [0,8,0]]
+
 
 scalable_jobs_quad = []
 for e in quad_Ns :
@@ -226,6 +229,10 @@ for e in memo_Ns :
 scalable_jobs_diamond = []
 for i in range(len(diamond_Ns)) :
     scalable_jobs_quad.append([diamond_times[i], f"-n {diamond_Ns[i]} -o ODD_SPLIT -t diamond -r 1"])
+
+scalable_jobs_diamondf = []
+for i in range(len(diamond_Ns)) :
+    scalable_jobs_quad.append([diamondf_times[i], f"-n {diamondf_Ns[i]} -o ODD_UNSPLIT -t diamond_full -r 1"])
 
 
 # --------------------------------------------------------------------------- #
@@ -251,7 +258,7 @@ BENCHMARKS = {
 
     "replace": m,
 
-    "replace_scalable": { dd_t.bdd: scalable_jobs_memo + scalable_jobs_diamond + scalable_jobs_quad},
+    "replace_scalable": { dd_t.bdd: scalable_jobs_memo + scalable_jobs_diamond + scalable_jobs_diamondf + scalable_jobs_quad},
 
 }
 
