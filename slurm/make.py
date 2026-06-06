@@ -130,13 +130,17 @@ def relnext__args(path, magnitude, dir_t):
 """
 
 
-small_instance = [10000, 10000, 3000]
-mid_instance = [30000, 30000, 6000]
-large_instance = [50000, 50000, 10000]
-names = ["quadratic", "diamond", "memo"]
+# small_instance = [10000, 10000, 3000]
+# mid_instance = [30000, 30000, 6000]
+# large_instance = [50000, 50000, 10000]
+# names = ["quadratic", "diamond", "memo"]
+small_instance = [10]
+mid_instance = [20]
+large_instance = [30]
+names = ["diamond_full"]
 test = [small_instance, mid_instance, large_instance]
-times = [[0, 0, 1], [0, 0, 1], [0, 0, 1]]
-times_ns = [[0, 0, 20], [0, 0, 40], [0, 2, 0]]
+times = [[0, 4, 0], [0, 4, 0], [0, 4, 0]]
+times_ns = [[0, 8, 0], [0, 8, 0], [0, 8, 0]]
 step = 10 #more smooth graphs this way even if many more files.. 
 r = "-r 1"
 m = {}

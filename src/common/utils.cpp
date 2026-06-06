@@ -282,7 +282,9 @@ typename Adapter::dd_t
 create_thicc_diamond(Adapter& adapter, int N, int scale = 1)
 {
     Permutation p = Permutation(N*2, 0, map_opt::ODD_SPLIT);
-    return adapter.replace(create_diamond(adapter, N), p); 
+    typename Adapter::dd_t dia = adapter.replace(create_diamond(adapter, N), p); 
+    if(scale > 1) {dia = adapter.replace(dia, [&](int x){return x*scale;});}
+    return dia;
 }
 
 template <typename Adapter>
