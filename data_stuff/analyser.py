@@ -73,6 +73,42 @@ def parse_filename(filename: str , benchmark):
         return "Unknown", filename, "Unknown"
 
 
+def extract_extra(text) :
+    text = re.sub(r"\x1b\[[0-9;]*[A-Za-z]", "", text)
+    metrics = {}
+    # BuDDy
+    m = re.search(r"total produced:\s*(\d+)", text)
+    if m:
+        metrics["total_produced"] = int(m.group(1))
+
+    m = re.search(r"Garbage Collections:\s*(\d+)", text)
+    if m:
+        metrics["gc_count"] = int(m.group(1))
+
+    # CUDD
+    m = re.search(r"peak node count:\s*(\d+)", text)
+    if m:
+        metrics["peak_node_count"] = int(m.group(1))
+
+    m = re.search( r"Garbage Collections:.*?\|\s*runs:\s*(\d+)",text, re.S)
+    if m:
+        metrics["gc_runs"] = int(m.group(1))
+
+    # Adiar
+    m = re.search(r"outer up sweep.*?inputs size\s+\d+\s+arcs\s*=\s*(\d+)\s+nodes", text, re.S)
+    if m:
+        metrics["outer_up_sweep_nodes"] = int(m.group(1))
+    else:
+        metrics["outer_up_sweep_nodes"] = 0
+
+    m = re.search(r"inner up sweep.*?inputs size\s+\d+\s+arcs\s*=\s*(\d+)\s+nodes", text, re.S,)
+    if m:
+        metrics["inner_up_sweep_nodes"] = int(m.group(1))
+    else:
+        metrics["inner_up_sweep_nodes"] = 0
+
+    return metrics
+
 def read_all_data(path, benchmark) :
     data_list = []
     broken_list = []
@@ -87,7 +123,10 @@ def read_all_data(path, benchmark) :
                 try:
                     data_block = extract_json_block(text)
                     data = json.loads(data_block)
-                    data_list.append(data)
+                    data_extra = extract_extra(text)
+                    data_list.append([data, data_extra])
+                    #get extra info from stats
+                    
                 except Exception as e:
                     errs = ["double free or corruption (out)", "corrupted size vs. prev_size", 
                             "double free or corruption (!prev)", "corrupted size vs. prev_size", 
@@ -127,13 +166,26 @@ def read_all_data(path, benchmark) :
 def extract_rep_special(data_list, extra_data):
     rows = []
     for i in range(len(data_list)):
-        package = data_list[i]["bdd package"]
-        benchmark = data_list[i]["benchmark"]
+        json_data = data_list[i][0]
+        stats_data = data_list[i][1]
+        package = json_data["bdd package"]
+        benchmark = json_data["benchmark"]
         specs = benchmark["specs"]
         construction = benchmark["construction"]
         intermediate = construction["intermediate results"]
         replace = construction["replace"]
-        resources = data_list[i]["resource usage"]
+        resources = json_data["resource usage"]
+        tot_nodes = 0
+        gc_runs = 0
+        if  package["name"] == "Adiar" :
+            tot_nodes = stats_data["outer_up_sweep_nodes"] + stats_data["inner_up_sweep_nodes"]
+            gc_runs = 0
+        elif package["name"] == "BuDDy" :
+            tot_nodes = stats_data["total_produced"]
+            gc_runs = stats_data["gc_count"]
+        elif package["name"] == "CUDD" :
+            tot_nodes = stats_data["peak_node_count"]
+            gc_runs = stats_data["gc_runs"]
         rows.append(
             {
                 "package" : package["name"],
@@ -145,6 +197,8 @@ def extract_rep_special(data_list, extra_data):
                 "ns": specs["nested_sweeping"],
                 "bf_size": intermediate["final size (nodes)"],
                 "af_size": replace["size (nodes)"],
+                "tot_nodes" : tot_nodes,
+                "gc_runs" : gc_runs 
             }
         )
     return rows + extra_data
@@ -152,8 +206,10 @@ def extract_rep_special(data_list, extra_data):
 def extract_rep_pico(data_list, extra_data) : 
     rows = []
     for i in range(len(data_list)):
-        package = data_list[i]["bdd package"]
-        benchmark = data_list[i]["benchmark"]
+        json_data = data_list[i][0]
+        stats_data = data_list[i][1]
+        package = json_data["bdd package"]
+        benchmark = json_data["benchmark"]
         construction = benchmark["construction"]
         final_diagrams_const = construction["final_diagrams"]
         replace = benchmark["bdd_replace(f)"]

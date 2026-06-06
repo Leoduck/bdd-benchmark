@@ -7,15 +7,13 @@ import analyser
 import sys
 
 #fancy style stuff TM
-colors = ["#F5F600", "#C9F400", "#00E33A", "#00D154","#00B06D","#00857B","#00697D","#24517D","#2E3F7C","#3C1678","#440068","#3E0046"]
-colors_better = ["#332288", "#88CCEE", "#44AA99", "#117733",  "#999933", "#DDCC77", "#CC6677", "#882255", "#AA4499", "#EECC77", "#EE6677"]
 col3 = ["#AE0060", "#00AA82", "#FF00AD", "#00FFD1", "#9F00CF", "#356DFD", "#00BCFC", "#FF91FE", "#F40020", "#FF5A21", "#FFCC1E"]
 col_circ_map = {"adder" : col3[0], "arbiter" : col3[1], "cavlc" : col3[2], "ctrl" : col3[3], "dec" : col3[4], 
                 "i2c" : col3[5], "int2float" : col3[6], "mem_ctrl" : col3[7], "router" : col3[8], "sin" : col3[9], "voter" : col3[10]}
 colors_special = ["#00D8F5", "#3D59F3", "#FF8000"]
 adiar_color = "#1F1F14"
-buddy_color = "#F60000"
-cudd_color = "#1000F6"
+buddy_color =  "#1000F6"
+cudd_color = "#F60000"
 plt.rc('font',family='TeX Gyre Schola')
 
 def group_ns_sp_times_per_jump_amount(instance, order) :
@@ -110,7 +108,6 @@ def special_case_plots(special_cases_df) :
     fig.subplots_adjust(bottom=0.20)
     plt.savefig('special.png')
 
-
 def picotrav_scatter_normal(buddy_pico_df, adiar_pico_df) :
     buddy_pico_data = buddy_pico_df.loc[buddy_pico_df["approach"] == "NORMAL"].rename(columns={"time (ms)" : "buddy time"})
     adiar_pico_data = adiar_pico_df.loc[adiar_pico_df["approach"] == "NORMAL"].rename(columns={"time (ms)" : "adiar time"})
@@ -146,8 +143,6 @@ def picotrav_scatter_normal(buddy_pico_df, adiar_pico_df) :
         ax.set_xscale("log")
         ax.legend()
         plt.savefig("scatter_normal.png")
-
-
 
 def picotrav_scatter_slowdown(other_pico_df, adiar_pico_df, other_name) :
 
@@ -250,7 +245,7 @@ def picotrav_scatter_slowdown(other_pico_df, adiar_pico_df, other_name) :
 
 ##plots for scalable examples buddy vs adiar
 
-def time_N_plots2(adiar_rep_df, buddy_rep_df, cudd_rep_df, bdd, size_pair) :
+def time_N_plots2(adiar_rep_df, buddy_rep_df, cudd_rep_df, bdd, annotation_list) :
     plt.rcParams.update({'font.size': 14})
     adiar_data = adiar_rep_df.loc[adiar_rep_df["bdd"] == bdd].rename(columns={"time (ms)" : "adiar time"}).dropna(subset=["adiar time"]).sort_values(["bdd", "n"])
     buddy_data = buddy_rep_df.loc[buddy_rep_df["bdd"] == bdd].rename(columns={"time (ms)" : "buddy time"}).dropna(subset=["buddy time"]).sort_values(["bdd", "n"])
@@ -258,17 +253,19 @@ def time_N_plots2(adiar_rep_df, buddy_rep_df, cudd_rep_df, bdd, size_pair) :
     fig, ax = plt.subplots()
 
     ax.plot(adiar_data["n"], adiar_data["adiar time"]+0.1, label="Adiar", marker='o', color=adiar_color)
-    ax.plot(buddy_data["n"], buddy_data["buddy time"]+0.1, label="BuDDy", marker='^', color=buddy_color)
-    ax.plot(cudd_data["n"], cudd_data["cudd time"]+0.1, label="CuDD", marker='s', color=cudd_color)
+    ax.plot(buddy_data["n"], buddy_data["buddy time"]+0.1, label="BuDDy", marker='s', color=buddy_color)
+    ax.plot(cudd_data["n"], cudd_data["cudd time"]+0.1, label="CuDD", marker='^', color=cudd_color)
 
-    place = 20 if bdd == "memo" else -45
-    size = adiar_data["af_size"].tolist()[-2] if bdd == "diamond" else  cudd_data["af_size"].tolist()[-1]
-    plt.annotate(f"{round(adiar_data["af_size"].tolist()[-1]*24/size_pair[0])} {size_pair[1]}",
-                 (adiar_data["n"].tolist()[-1], adiar_data["adiar time"].tolist()[-1]),textcoords="offset points",xytext=(2,-45),ha='center', color=adiar_color, rotation = 90)
-    plt.annotate(f"{round(buddy_data["af_size"].tolist()[-1]*24/size_pair[0])} {size_pair[1]}",
-                 (buddy_data["n"].tolist()[-1], buddy_data["buddy time"].tolist()[-1]),textcoords="offset points",xytext=(2,-40),ha='center', color=buddy_color, rotation = 90)
-    plt.annotate(f"{round(size*32/size_pair[0])} {size_pair[1]}",
-                 (cudd_data["n"].tolist()[-1], cudd_data["cudd time"].tolist()[-1]),textcoords="offset points",xytext=(2,place),ha='center', color=cudd_color, rotation = 90)
+    a_label = f"{round(adiar_data["tot_nodes"].to_list()[-1]*24/annotation_list[0])} {annotation_list[1]}"
+    b_label = f"{round(buddy_data["tot_nodes"].to_list()[-1]*24/annotation_list[0])} {annotation_list[1]}"
+    c_label = f"{round(cudd_data["tot_nodes"].to_list()[-1]*32/annotation_list[0])} {annotation_list[1]}"
+
+    plt.annotate(a_label, (adiar_data["n"].tolist()[-1], adiar_data["adiar time"].tolist()[-1]), 
+                 textcoords="offset points",xytext=(2,annotation_list[2]),ha='center', color=adiar_color, rotation = 90, fontsize=14)
+    plt.annotate(b_label, (buddy_data["n"].tolist()[-1], buddy_data["buddy time"].tolist()[-1]),
+                 textcoords="offset points",xytext=(2,annotation_list[3]),ha='center', color=buddy_color, rotation = 90, fontsize=14)
+    plt.annotate(c_label, (cudd_data["n"].tolist()[-1], cudd_data["cudd time"].tolist()[-1]),
+                 textcoords="offset points",xytext=(2,annotation_list[4]),ha='center', color=cudd_color, rotation = 90, fontsize=14)
     
     ax.set_xlabel("Instance size N", fontsize=20)
     ax.set_yscale("log")
@@ -276,7 +273,7 @@ def time_N_plots2(adiar_rep_df, buddy_rep_df, cudd_rep_df, bdd, size_pair) :
     ax.set_title(bdd.capitalize(), fontsize=30)
     
     plt.grid()
-    plt.legend(fontsize=20)
+    plt.legend(fontsize=14)
     plt.savefig(f"time_chart_{bdd}.png")
 
 #buddy compose vs replace
@@ -314,6 +311,71 @@ def read_to_df(path, kind, order) :
     df = pd.DataFrame(rows).sort_values(by=order)
     return df
 
+
+def scalable_table(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df) :
+    bdds = ["quadratic", "diamond", "memo"]
+    for bdd in bdds :
+        inst_adiar = adiar_scalable_df.loc[adiar_scalable_df["bdd"] == bdd].rename(columns={"time (ms)" : "adiar time"})[["bdd", "n", "adiar time"]].sort_values(["bdd", "n"]).reset_index()
+        inst_buddy = buddy_scalable_df.loc[buddy_scalable_df["bdd"] == bdd].rename(columns={"time (ms)" : "buddy time"})[["bdd", "n", "buddy time"]].sort_values(["bdd", "n"]).reset_index()
+        inst_cudd = cudd_scalable_df.loc[cudd_scalable_df["bdd"] == bdd].rename(columns={"time (ms)" : "cudd time"})[["bdd", "n", "cudd time"]].sort_values(["bdd", "n"]).reset_index()
+
+        
+        if (bdd != "memo") :
+            test = inst_adiar.merge(inst_buddy, on=["bdd", "n"], how="left")[["bdd", "n", "adiar time", "buddy time"]]
+            combined = test.merge(inst_cudd, on=["bdd", "n"], how="left")[["bdd", "n", "adiar time", "buddy time", "cudd time"]]
+        else :
+            test = inst_buddy.merge(inst_adiar, on=["bdd", "n"], how="left")[["bdd", "n", "adiar time", "buddy time"]]
+            combined = test.merge(inst_cudd, on=["bdd", "n"], how="left")[["bdd", "n", "adiar time", "buddy time", "cudd time"]]
+        
+
+        #factor columns
+        combined["ab"] = (combined["adiar time"]+1) / (combined["buddy time"] +1)
+        combined["ac"] = (combined["adiar time"]+1) / (combined["cudd time"] +1)
+
+        #with pd.option_context("display.max_rows", None, "display.max_columns", None, "display.width", 1000): 
+        #   print(combined)
+       
+        print(f"{bdd} : avg slowdown ab: {combined["ab"].mean()}")
+        print(f"{bdd} : avg slowdown ac: {combined["ac"].mean()}")
+        print()
+
+def pico_table(adiar_pico_df, buddy_pico_df, cudd_pico_df) :
+    circs = adiar_pico_df["circuit"].unique()
+    for c in circs :
+        inst_adiar = adiar_pico_df.loc[(adiar_pico_df["circuit"] == c) & (adiar_pico_df["approach"] == "NORMAL")].rename(columns={"time (ms)" : "adiar time"}).reset_index(drop=True)
+        inst_buddy = buddy_pico_df.loc[buddy_pico_df["circuit"] == c].rename(columns={"time (ms)" : "buddy time"}).reset_index(drop=True)
+        inst_cudd = cudd_pico_df.loc[cudd_pico_df["circuit"] == c].rename(columns={"time (ms)" : "cudd time"}).reset_index(drop=True)
+
+        test = inst_cudd.merge(inst_adiar, on=["circuit", "order"], how="left")[["circuit", "order", "adiar time", "cudd time", "before_sum_x"]]
+        combined = test.merge(inst_buddy, on=["circuit", "order"], how="left")[["circuit", "order", "adiar time", "buddy time", "cudd time", "before_sum_x"]]
+        #with pd.option_context("display.max_rows", None, "display.max_columns", None, "display.width", 1000): 
+        #    print(combined)
+        
+        combined["ab"] = (combined["adiar time"]+1) / (combined["buddy time"] +1)
+        combined["ac"] = (combined["adiar time"]+1) / (combined["cudd time"] +1)
+
+        print(f"{c} : avg slowdown ab: {round(combined["ab"].mean(),3)}")
+        print(f"{c} : avg slowdown ac: {round(combined["ac"].mean(),3)}")
+        print()
+
+def special_data(special_df) :
+    scs = ["JUMP_DOWN", "JUMP_UP", "ADJ_SWAP"]
+    for s in scs :
+        special_data_s = special_df.loc[(special_df["order"] == s) & (special_df["ns"] == False)].rename(columns={"time (ms)" : "special time"})[["bdd", "order", "n", "jumps", "special time"]]
+        special_data_ns = special_df.loc[(special_df["order"] == s) & (special_df["ns"] == True)].rename(columns={"time (ms)" : "ns time"})[["bdd", "order", "n", "jumps", "ns time"]]
+        
+        combined = special_data_s.merge(special_data_ns, on=["bdd", "order","n", "jumps"])
+        combined["speed up"] = combined["ns time"] / combined["special time"]
+        #with pd.option_context("display.max_rows", None, "display.max_columns", None, "display.width", 1000): 
+        #    print(combined)
+        
+        avg_speedup = combined["speed up"].mean()
+        min_speedup = combined["speed up"].min()
+        min_speedup_row = combined.loc[combined["speed up"] == min_speedup]
+        print(f"s: avg_speedup = {avg_speedup}")
+        print(f"s: smallest speedup: \n { min_speedup_row }")
+        print()
+
 def main() :
     #expect - given path for buddy and adiar
     args = sys.argv[1:]
@@ -340,27 +402,27 @@ def main() :
     buddy_scalable_df = read_to_df(buddy_scale_path,  analyser.Benchmark.SPECIAL, ["bdd"])
     cudd_scalable_df = read_to_df(cudd_scale_path,  analyser.Benchmark.SPECIAL, ["bdd"])
 
+    """
     with pd.option_context(
     "display.max_rows", None, "display.max_columns", None, "display.width", 1000): 
-        print(adiar_pico_df)
-        print(cudd_pico_df)
-        print(adiar_pico_df)
+        print(adiar_scalable_df[["bdd","n","tot_nodes", "gc_runs"]])
+        print(buddy_scalable_df[["bdd","n","tot_nodes", "gc_runs"]])
+        print(cudd_scalable_df[["bdd","n","tot_nodes", "gc_runs"]])
+    """
 
     #drawing graphs
     special_case_plots(special_df)
     picotrav_scatter_slowdown(buddy_pico_df , adiar_pico_df, "BuDDy")
     picotrav_scatter_slowdown(cudd_pico_df , adiar_pico_df, "CUDD")
-    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "quadratic", [1024, "KiB"])
-    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "diamond", [1048576, "MiB"])
-    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "memo", [1024, "KiB"])
-    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "diamond_full", [1024, "KiB"])
+    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "quadratic", [1048576, "MiB", -80, -75, -100])
+    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "diamond", [1048576, "MiB", -80, -70, -90])
+    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "memo", [1048576, "MiB", -80, -50, 20])
+    time_N_plots2(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df, "diamond_full", [1048576, "MiB", -80, -70, -120])
     buddy_comp()
     quad_transpose_ns_times(special_df)
 
-
-
-    #transposition experiments 2.0 - run locally
-    path = "../results2"
+    #transposition experiments 2.0 - run locally 
+    """path = "../results2"
     res , broken = analyser.read_all_data(path, analyser.Benchmark.SPECIAL)
     print(f"there are no broken? {len(broken)}")
     rows = analyser.extract_rep_special(res, broken)
@@ -376,65 +438,12 @@ def main() :
     ax[0].set_yscale("log")
 
     ax[1].plot(dfa["n"], fac)
-    plt.savefig("q_trans.png")
+    plt.savefig("q_trans.png")"""
 
-
-
-    #table data
-    #scalable average calc per benchmark
-    """
-    bdds = ["quadratic", "diamond", "memo"]
-    for bdd in bdds :
-        inst_adiar = adiar_scalable_df.loc[adiar_scalable_df["bdd"] == bdd].rename(columns={"time (ms)" : "adiar time"}).reset_index(drop=True)
-        inst_buddy = buddy_scalable_df.loc[buddy_scalable_df["bdd"] == bdd].rename(columns={"time (ms)" : "buddy time"}).reset_index(drop=True)
-        inst_cudd = cudd_scalable_df.loc[cudd_scalable_df["bdd"] == bdd].rename(columns={"time (ms)" : "cudd time"}).reset_index(drop=True)
-
-        combined = pd.concat([
-            inst_adiar[["bdd", "n", "adiar time"]],
-            inst_buddy[["bdd", "n", "buddy time"]],
-            inst_cudd[["bdd", "n", "cudd time"]]
-        ])
-        combined["n"] = combined["n"].astype(int)
-        combined = combined.groupby("n", as_index=False).sum(min_count=1).sort_values("n")
-
-        #factor columns
-        combined["ab"] = (combined["adiar time"]+1) / (combined["buddy time"] +1)
-        combined["ac"] = (combined["adiar time"]+1) / (combined["cudd time"] +1)
-       
-        print(f"{bdd} : avg slowdown ab: {combined["ab"].mean()}")
-        print(f"{bdd} : avg slowdown ac: {combined["ac"].mean()}")
-    print()
-    # pico: avg slowdown per circuit
-    circs = adiar_pico_df["circuit"].unique()
-    for c in circs :
-        inst_adiar = adiar_pico_df.loc[adiar_pico_df["circuit"] == c].rename(columns={"time (ms)" : "adiar time"}).reset_index(drop=True)
-        inst_buddy = buddy_pico_df.loc[buddy_pico_df["circuit"] == c].rename(columns={"time (ms)" : "buddy time"}).reset_index(drop=True)
-        inst_cudd = cudd_pico_df.loc[cudd_pico_df["circuit"] == c].rename(columns={"time (ms)" : "cudd time"}).reset_index(drop=True)
-
-        combined = pd.concat([
-            inst_adiar[["circuit", "order", "output gates", "adiar time"]],
-            inst_buddy[["circuit", "order", "output gates","buddy time"]],
-            inst_cudd[["circuit", "order", "output gates", "cudd time"]]
-        ])
-        # Keep one copy of output gates (same across all three, so just take first)
-        output_gates = combined.groupby("order", as_index=False)["output gates"].first()
-
-        # Sum only the time columns
-        times = combined.groupby("order", as_index=False)[["adiar time", "buddy time", "cudd time"]].sum(min_count=1)
-
-        combined = times.merge(output_gates, on="order")
-        #combined = combined.groupby("order", as_index=False).sum(min_count=1)
-        
-        combined["ab"] = (combined["adiar time"]+1) / (combined["buddy time"] +1)
-        combined["ac"] = (combined["adiar time"]+1) / (combined["cudd time"] +1)
-        combined["time per output"] = (combined["adiar time"]) / (combined["output gates"])
-        print(combined)
-        print(f"{c} : avg slowdown ab: {combined["ab"].mean()}")
-        print(f"{c} : avg slowdown ac: {combined["ac"].mean()}")
-        print(f"{c} : per bdd time: {combined["time per output"].tolist()}")
-    """
-
-    
-
+    #table and text data
+    scalable_table(adiar_scalable_df, buddy_scalable_df, cudd_scalable_df)
+    pico_table(adiar_pico_df, buddy_pico_df, cudd_pico_df)
+    special_data(special_df)
+   
 if __name__ == "__main__":
     main()
