@@ -89,18 +89,37 @@ def read_all_data(path, benchmark) :
                     data = json.loads(data_block)
                     data_list.append(data)
                 except Exception as e:
+                    errs = ["double free or corruption (out)", "corrupted size vs. prev_size", 
+                            "double free or corruption (!prev)", "corrupted size vs. prev_size", 
+                            "free(): corrupted unsorted chunks", "BDD error: Out of memory"]
+                    #print(e)
                     if (benchmark == Benchmark.SPECIAL) :
                         broken_list.append(
                             {"n": n_b, "bdd": t_b, "order": o_b, "jumps": j_b, "ns": r_b}
                         )
                     elif (benchmark == Benchmark.PICO) :
-                        broken_list.append(
-                            {
-                                "circuit": circuit_backup,
-                                "order": order_backup,
-                                "approach": approach_b,
-                            }
-                        )
+                        is_err = False
+                        for e in errs :
+                            is_err = is_err or (text.find(e) != -1)
+                        if is_err :
+                            print("test!")
+                            broken_list.append(
+                                {
+                                    "circuit": circuit_backup,
+                                    "order": order_backup,
+                                    "approach": approach_b,
+                                }
+                            )
+                        else :
+                            broken_list.append(
+                                {
+                                    "circuit": circuit_backup,
+                                    "order": order_backup,
+                                    "approach": approach_b,
+                                    "time (ms)": 2880000
+                                }
+                            
+                            )
                     continue
     return data_list , broken_list
 
@@ -114,9 +133,10 @@ def extract_rep_special(data_list, extra_data):
         construction = benchmark["construction"]
         intermediate = construction["intermediate results"]
         replace = construction["replace"]
-        # resources = data_list[i]["resource usage"]
+        resources = data_list[i]["resource usage"]
         rows.append(
             {
+                "package" : package["name"],
                 "n": specs["n"],
                 "bdd": specs["bdd type"],
                 "order": specs["order"],
@@ -142,6 +162,7 @@ def extract_rep_pico(data_list, extra_data) :
             {
                 "circuit": construction["path"].split("/")[-1],
                 "order": benchmark["order"],
+                "output gates" : construction["output gates"],
                 "approach": benchmark["nested_mix"],
                 "time (ms)": replace["time (ms)"],
                 "total (ms)": benchmark["total time (ms)"],
@@ -149,6 +170,7 @@ def extract_rep_pico(data_list, extra_data) :
                 "before_sum": final_diagrams_const["sizesum (nodes)"],
                 "after_max": final_diagrams_rep["sizemax (nodes)"],
                 "after_sum": final_diagrams_rep["sizesum (nodes)"],
+                "identity_order" : replace["identity reorder"]
             }
         )
     return rows + extra_data
