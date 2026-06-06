@@ -106,6 +106,7 @@ int run_replace(int argc, char** argv) {
     int varcount = 0; 
     switch(t) {
     case instance_opt::DIAMOND: {varcount = N*2; break;}
+    case instance_opt::DIAMOND_FULL: {varcount = N*2; break;}
     case instance_opt::QUADRATIC: {varcount = N*2; break;}
     case instance_opt::MEMO: {varcount = (N * 2) + 2 ; break;}
     case instance_opt::ERROR: {return -1;}
@@ -138,6 +139,7 @@ int run_replace(int argc, char** argv) {
     const time_point t1 = now();
     switch(t) {
       case instance_opt::DIAMOND: {dd = create_diamond(adapter, N, scale);  break;}
+      case instance_opt::DIAMOND_FULL: {dd = create_thicc_diamond(adapter, N, scale);  break;}
       case instance_opt::QUADRATIC: {dd = create_quadratic(adapter, N, scale); break;}
       case instance_opt::MEMO: {dd = create_memo(adapter, N, scale); break;}
       case instance_opt::ERROR: {return -1;}

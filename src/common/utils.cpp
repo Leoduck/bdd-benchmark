@@ -12,14 +12,16 @@ enum class map_opt : signed char {
     ODD_SPLIT = 4,
     MEMO_SPEC = 5,
     JUMP_UP = 6,
-    ERROR = 7
+    ODD_UNSPLIT = 7,
+    ERROR = 8
 };
 
 enum class instance_opt : signed char {
     QUADRATIC = 0,
     DIAMOND = 1,
     MEMO = 2,
-    ERROR = 3
+    DIAMOND_FULL = 3,
+    ERROR = 4
 };
 
 
@@ -28,6 +30,7 @@ instance_opt
 inst_o_of_string(std::string t){
     if (t == "quadratic" || t == "QUADRATIC") {return instance_opt::QUADRATIC;}
     if (t == "diamond" || t == "DIAMOND") {return instance_opt::DIAMOND;}
+    if (t == "diamond_full" || t == "DIAMOND_FULL") {return instance_opt::DIAMOND_FULL;}
     if (t == "memo" || t == "MEMO") {return instance_opt::MEMO;}
     return instance_opt::ERROR; //invalid   
 }
@@ -41,7 +44,7 @@ mo_of_string(std::string o){
   if (o == "jump_up" || o == "JUMP_UP") {return map_opt::JUMP_UP;}
   if (o == "odd_split" || o == "ODD_SPLIT") {return map_opt::ODD_SPLIT;}
   if (o == "memo_spec" || o == "MEMO_SPEC") {return map_opt::MEMO_SPEC;}
-  if (o == "diamond" || o == "odd_split" || "ODD_SPLIT") {return map_opt::ODD_SPLIT;}
+  if (o == "odd_unsplit" || o == "ODD_UNSPLIT") {return map_opt::ODD_UNSPLIT;}
   return map_opt::ERROR; // invalid! 
 } 
 
@@ -159,6 +162,24 @@ public:
                 }
                 perm = result;
                 break;}
+            case map_opt::ODD_UNSPLIT : {
+                size_t n = perm.size();
+                std::vector<unsigned> result(n);
+
+                unsigned evenValue = 0;  // 0, 2, 4, ...
+                unsigned oddValue = 1;   // 1, 3, 5, ...
+
+                for (size_t i = 0; i < n; ++i) {
+                    if (i < n / 2) {
+                        result[i] = evenValue;
+                        evenValue += 2;
+                    } else {
+                        result[i] = oddValue;
+                        oddValue += 2;
+                    }
+                }
+                perm = result;
+                break;}
             case map_opt::JUMP_DOWN :{
                 //assume only even layers present in bdd
                 perm.resize(N*2);
@@ -241,7 +262,7 @@ public:
     /*int number_mods = 0;
     for (size_t i = 0; i < perm.size(); ++i) { if (i != perm[i]) number_mods++;}
     std::cout << "we change " << number_mods << "layers, should be " << number_mods/2 << "swaps?\n" ;*/
-    for (size_t i = 0; i < perm.size(); ++i) { if (i != perm[i]) std::cout << i << ":" << perm[i] <<"; ";}
+    for (size_t i = 0; i < perm.size(); ++i) { std::cout << i << ":" << perm[i] <<"; ";}
     std::cout << '\n';
   }
   void print_it(size_t limit){
@@ -255,6 +276,16 @@ public:
     return perm[x];
     }
 };
+
+template <typename Adapter>
+typename Adapter::dd_t
+create_thicc_diamond(Adapter& adapter, int N, int scale = 1)
+{
+    Permutation p = Permutation(N*2, 0, map_opt::ODD_SPLIT);
+    typename Adapter::dd_t dia = adapter.replace(create_diamond(adapter, N), p); 
+    if(scale > 1) {dia = adapter.replace(dia, [&](int x){return x*scale;});}
+    return dia;
+}
 
 template <typename Adapter>
 typename Adapter::dd_t
@@ -272,16 +303,21 @@ create_diamond2(Adapter& adapter, int N, int scale = 1)
     return res;
 }
 
-// For testing the permutations...
- // int main(int argc, char **argv){
- //   int N, seed;
- //   while(true) {
- //     std::cin >> N;
- //     std::cin >> seed;
- //     Permutation p = Permutation(N, seed, map_opt::MEMO_SPEC);
- //     for (int i = 0; i < N; i++) {
- //       std::cout << p(i) << ", ";
- //     }
- //     std::cout << '\n';
- //   }
- // }
+
+
+// //For testing the permutations...
+//  int main(int argc, char **argv){
+//    int N, seed;
+//    while(true) {
+//      std::cin >> N;
+//      std::cin >> seed;
+//      std::cout << "Odd_split:";
+//      Permutation p = Permutation(N, seed, map_opt::ODD_SPLIT);
+//      p.print_it();
+//
+//      std::cout << "ZIP:";
+//      Permutation p2 = Permutation(N, seed, map_opt::ZIP);
+//      p2.print_it();
+//      std::cout << '\n';
+//    }
+//  }
