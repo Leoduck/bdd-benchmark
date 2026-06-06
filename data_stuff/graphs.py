@@ -367,7 +367,7 @@ def special_data(special_df) :
         combined = special_data_s.merge(special_data_ns, on=["bdd", "order","n", "jumps"])
         combined["speed up"] = combined["ns time"] / combined["special time"]
         #with pd.option_context("display.max_rows", None, "display.max_columns", None, "display.width", 1000): 
-        #    print(combined)
+        #    print(combined) test
         
         avg_speedup = combined["speed up"].mean()
         min_speedup = combined["speed up"].min()
