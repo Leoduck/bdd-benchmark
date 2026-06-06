@@ -134,7 +134,7 @@ def relnext__args(path, magnitude, dir_t):
 # mid_instance = [30000, 30000, 6000]
 # large_instance = [50000, 50000, 10000]
 # names = ["quadratic", "diamond", "memo"]
-small_instance = [10]
+small_instance = [15]
 mid_instance = [20]
 large_instance = [30]
 names = ["diamond_full"]
