@@ -204,7 +204,7 @@ public:
                 for (size_t i = 0; i < N * 2; i++){
                     perm[i] = i;
                 };
-                size_t segment_size = (N*2)/number_jumps;
+                size_t segment_size = ((N-1)*2)/number_jumps;
                 for (size_t i = 0; i < number_jumps; i++) {
                     size_t to = i * segment_size;
                     size_t from = to + segment_size;

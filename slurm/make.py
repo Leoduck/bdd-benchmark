@@ -130,17 +130,17 @@ def relnext__args(path, magnitude, dir_t):
 """
 
 
-# small_instance = [10000, 10000, 3000]
-# mid_instance = [30000, 30000, 6000]
-# large_instance = [50000, 50000, 10000]
-# names = ["quadratic", "diamond", "memo"]
-small_instance = [15]
-mid_instance = [20]
-large_instance = [30]
-names = ["diamond_full"]
+small_instance = [10000, 10000, 3000]
+mid_instance = [30000, 30000, 6000]
+large_instance = [50000, 50000, 10000]
+names = ["quadratic", "diamond", "memo"]
+small_instance = small_instance + [15]
+mid_instance = mid_instance + [20]
+large_instance = large_instance + [30]
+names = names + ["diamond_full"]
 test = [small_instance, mid_instance, large_instance]
 times = [[0, 4, 0], [0, 4, 0], [0, 4, 0]]
-times_ns = [[0, 8, 0], [0, 8, 0], [0, 8, 0]]
+times_ns = [[0, 6, 0], [0, 6, 0], [0, 6, 0]]
 step = 10 #more smooth graphs this way even if many more files.. 
 r = "-r 1"
 m = {}
@@ -168,11 +168,11 @@ for i in range(len(names)):
             sn = f"-n {n} -t {inst} -o ADJ_SWAP -j {number_swaps} {r}"
             jdn = f"-n {n} -t {inst} -o JUMP_DOWN -j {number_jumps} {r}"
             jun = f"-n {n} -t {inst} -o JUMP_UP -j {number_jumps} {r}"
-            l.append([times[j], s])
-            l.append([times[j], jd])
+            # l.append([times[j], s])
+            # l.append([times[j], jd])
             l.append([times[j], ju])
-            l.append([times_ns[j], sn])
-            l.append([times_ns[j], jdn])
+            # l.append([times_ns[j], sn])
+            # l.append([times_ns[j], jdn])
             l.append([times_ns[j], jun])
 m.update({dd_t.bdd: l})
 
